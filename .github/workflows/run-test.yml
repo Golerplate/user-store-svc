@@ -31,4 +31,4 @@ jobs:
       run: |
         coverage_percentage=$(go tool cover -func=coverage.out | grep total | awk '{print $3}' | tr -d '%')
         echo "Coverage percentage: $coverage_percentage"
-        python -c "import sys; sys.exit(0 if float('$coverage_percentage') >= 80 else 1)"
+        python -c "import sys; sys.exit(0 if float('$coverage_percentage') >= 80 else 1)" || (echo "Coverage is less than 80%. Please increase the coverage."; exit 1)
