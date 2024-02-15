@@ -28,4 +28,10 @@ jobs:
       run: go test -coverprofile=coverage.out ./...
 
     - name: Display Coverage Percentage
-      run: go tool cover -func=coverage.out | grep total
+      run: |
+        coverage_percentage=$(go tool cover -func=coverage.out | grep total | awk '{print $3}')
+        echo "Coverage percentage: $coverage_percentage"
+        if (( $(echo "$coverage_percentage < 80" | bc -l) )); then
+          echo "Coverage is less than 80%."
+          exit 1
+        fi
