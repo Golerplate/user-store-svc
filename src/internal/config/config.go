@@ -6,17 +6,12 @@ import (
 )
 
 type Config struct {
-	HTTPServerConfig
 	GRPCServerConfig
 	GeneralConfig
 }
 
 type GeneralConfig struct {
 	Environment string `env:"ENVIRONMENT" envDefault:"local"`
-}
-
-type HTTPServerConfig struct {
-	Port uint16 `env:"HTTP_SERVER_PORT" envDefault:"3003"`
 }
 
 type GRPCServerConfig struct {

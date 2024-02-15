@@ -1,3 +1,7 @@
+github.com/Golerplate/contracts v0.0.0-20240214170651-36de4fc4dcb6 h1:noN6xrj4tYbW681/3HPIXPKIOSdPtjWCwhWgBAuex7I=
+github.com/Golerplate/contracts v0.0.0-20240214170651-36de4fc4dcb6/go.mod h1:C+oSpzvwCw0ZZFVi5dsRHdV720UNGxay8LngNeWSAqI=
+github.com/Golerplate/pkg v0.0.1 h1:NiSKK0epA/TCp8BsEcZ4Zb/s//baa3uMktjN9gXZYJQ=
+github.com/Golerplate/pkg v0.0.1/go.mod h1:7V9il3+ESzVTA0uasLuQoI4OGX0iQYBiWMojZNqdlgY=
 github.com/Trade-Arcade-Inc/shared v0.7.140 h1:UMZgktYy/vvk2L5S4jdjmXuRLBGh1Gq7Szxakb8J228=
 github.com/Trade-Arcade-Inc/shared v0.7.140/go.mod h1:izkLhXVU2B6XIoBfvx9cRmcySl1lUKrRhUjV17Oc1Hw=
 github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=

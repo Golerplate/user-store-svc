@@ -14,6 +14,8 @@ require (
 )
 
 require (
+	github.com/Golerplate/contracts v0.0.0-20240214170651-36de4fc4dcb6 // indirect
+	github.com/Golerplate/pkg v0.0.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect

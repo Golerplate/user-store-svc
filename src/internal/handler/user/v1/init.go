@@ -1,15 +1,15 @@
 package handler_user_v1
 
 import (
+	"github.com/Golerplate/contracts/generated/services/user/store/v1/storev1connect"
 	"github.com/Golerplate/user-store-svc/src/internal/service"
-	"github.com/Trade-Arcade-Inc/shared/generated/services/chnl/store/v1/storev1connect"
 )
 
 type handler struct {
 	userStoreService service.UserStoreService
 }
 
-func NewUserStoreServiceHandler(userStoreService service.UserStoreService) storev1connect.ChnlStoreServiceHandler {
+func NewUserStoreServiceHandler(userStoreService service.UserStoreService) storev1connect.UserStoreServiceHandler {
 	return &handler{
 		userStoreService: userStoreService,
 	}
