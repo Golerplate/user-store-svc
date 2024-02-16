@@ -2,8 +2,6 @@ github.com/Golerplate/contracts v0.0.1 h1:OtKvpCKVQGTjLFbxYPBkHn/ZC5wQoaumfTlpNu
 github.com/Golerplate/contracts v0.0.1/go.mod h1:ALtjMgMcSLE6wGcB2zGIWand81y0HsU+MIvn1mmBP+0=
 github.com/Golerplate/pkg v0.0.2 h1:b1T2Rky4BaJ5c9bHeh0cVII8M1LWcvKfzDJkGmT/G5w=
 github.com/Golerplate/pkg v0.0.2/go.mod h1:xj+tuGKV3MtOpy/B6SMBJ0EkbaXMaivufhce/SzwqRk=
-github.com/Trade-Arcade-Inc/shared v0.7.140 h1:UMZgktYy/vvk2L5S4jdjmXuRLBGh1Gq7Szxakb8J228=
-github.com/Trade-Arcade-Inc/shared v0.7.140/go.mod h1:izkLhXVU2B6XIoBfvx9cRmcySl1lUKrRhUjV17Oc1Hw=
 github.com/bufbuild/connect-go v1.10.0 h1:QAJ3G9A1OYQW2Jbk3DeoJbkCxuKArrvZgDt47mjdTbg=
 github.com/bufbuild/connect-go v1.10.0/go.mod h1:CAIePUgkDR5pAFaylSMtNK45ANQjp9JvpluG20rhpV8=
 github.com/bufbuild/connect-grpcreflect-go v1.1.0 h1:T0FKu1y9zZW4cjHuF+Q7jIN6ek8HTpCxOP8ZsORZICg=
