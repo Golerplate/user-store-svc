@@ -1,5 +1,5 @@
-github.com/Golerplate/contracts v0.0.1 h1:OtKvpCKVQGTjLFbxYPBkHn/ZC5wQoaumfTlpNuvSmO4=
-github.com/Golerplate/contracts v0.0.1/go.mod h1:ALtjMgMcSLE6wGcB2zGIWand81y0HsU+MIvn1mmBP+0=
+github.com/Golerplate/contracts v0.0.2 h1:nII6q/QV2QjeTYw4g21G8eT2lzIA6ZXGFHKGQkGiL2k=
+github.com/Golerplate/contracts v0.0.2/go.mod h1:ALtjMgMcSLE6wGcB2zGIWand81y0HsU+MIvn1mmBP+0=
 github.com/Golerplate/pkg v0.0.2 h1:b1T2Rky4BaJ5c9bHeh0cVII8M1LWcvKfzDJkGmT/G5w=
 github.com/Golerplate/pkg v0.0.2/go.mod h1:xj+tuGKV3MtOpy/B6SMBJ0EkbaXMaivufhce/SzwqRk=
 github.com/bufbuild/connect-go v1.10.0 h1:QAJ3G9A1OYQW2Jbk3DeoJbkCxuKArrvZgDt47mjdTbg=

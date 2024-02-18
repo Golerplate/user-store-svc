@@ -1,4 +1,4 @@
-package handler_user_v1
+package handlers_grpc_user_v1
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 
 	userv1 "github.com/Golerplate/contracts/generated/services/user/store/v1"
 	"github.com/Golerplate/pkg/grpc"
-	entity_user_v1 "github.com/Golerplate/user-store-svc/src/internal/entity/user/v1"
+	entities_user_v1 "github.com/Golerplate/user-store-svc/internal/entities/user/v1"
 	connectgo "github.com/bufbuild/connect-go"
 	"github.com/golang/protobuf/ptypes/wrappers"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -24,7 +24,7 @@ func (h *handler) CreateUser(ctx context.Context, c *connectgo.Request[userv1.Cr
 		return nil, connectgo.NewError(connectgo.CodeInvalidArgument, errors.New("invalid password"))
 	}
 
-	user, err := h.userStoreService.CreateUser(ctx, &entity_user_v1.CreateUserRequest{
+	user, err := h.userStoreService.CreateUser(ctx, &entities_user_v1.CreateUserRequest{
 		Username: c.Msg.GetUsername().GetValue(),
 		Email:    c.Msg.GetEmail().GetValue(),
 		Password: c.Msg.GetPassword().GetValue(),

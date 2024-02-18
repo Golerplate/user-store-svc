@@ -3,7 +3,7 @@ module github.com/Golerplate/user-store-svc
 go 1.21.5
 
 require (
-	github.com/Golerplate/contracts v0.0.1
+	github.com/Golerplate/contracts v0.0.2
 	github.com/Golerplate/pkg v0.0.2
 	github.com/bufbuild/connect-go v1.10.0
 	github.com/bufbuild/connect-grpcreflect-go v1.1.0

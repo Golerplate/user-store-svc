@@ -1,7 +1,7 @@
 package planetscale
 
 import (
-	"github.com/Golerplate/user-store-svc/src/internal/service/datastore"
+	"github.com/Golerplate/user-store-svc/internal/service/datastore"
 	_ "github.com/go-sql-driver/mysql"
 )
 

@@ -1,8 +1,6 @@
 package service
 
-import (
-	"github.com/Golerplate/user-store-svc/src/internal/service/datastore"
-)
+import "github.com/Golerplate/user-store-svc/internal/service/datastore"
 
 type service struct {
 	store datastore.UserStoreServiceDatastore
