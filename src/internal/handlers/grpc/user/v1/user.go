@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 
-	userv1 "github.com/Golerplate/contracts/generated/services/user/store/svc/v1"
-	"github.com/Golerplate/pkg/grpc"
-	entities_user_v1 "github.com/Golerplate/user-store-svc/internal/entities/user/v1"
 	connectgo "github.com/bufbuild/connect-go"
 	"github.com/golang/protobuf/ptypes/wrappers"
+	userv1 "github.com/golerplate/contracts/generated/services/user/store/svc/v1"
+	"github.com/golerplate/pkg/grpc"
+	entities_user_v1 "github.com/golerplate/user-store-svc/internal/entities/user/v1"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -34,13 +34,13 @@ func (h *handler) CreateUser(ctx context.Context, c *connectgo.Request[userv1.Cr
 
 	return connectgo.NewResponse(&userv1.CreateUserResponse{
 		User: &userv1.User{
-			Id:        &wrappers.StringValue{Value: user.ID},
-			Username:  &wrappers.StringValue{Value: user.Username},
-			Email:     &wrappers.StringValue{Value: user.Email},
-			IsAdmin:   &wrappers.BoolValue{Value: user.IsAdmin},
-			IsBanned:  &wrappers.BoolValue{Value: user.IsBanned},
-			CreatedAt: &timestamppb.Timestamp{Seconds: int64(user.CreatedAt.Second()), Nanos: int32(user.CreatedAt.Nanosecond())},
-			UpdatedAt: &timestamppb.Timestamp{Seconds: int64(user.UpdatedAt.Second()), Nanos: int32(user.UpdatedAt.Nanosecond())},
+			Id:             &wrappers.StringValue{Value: user.ID},
+			Username:       &wrappers.StringValue{Value: user.Username},
+			Email:          &wrappers.StringValue{Value: user.Email},
+			IsVerified:     &wrappers.BoolValue{Value: user.IsVerified},
+			ProfilePicture: &wrappers.StringValue{Value: user.ProfilePicture},
+			CreatedAt:      &timestamppb.Timestamp{Seconds: int64(user.CreatedAt.Second()), Nanos: int32(user.CreatedAt.Nanosecond())},
+			UpdatedAt:      &timestamppb.Timestamp{Seconds: int64(user.UpdatedAt.Second()), Nanos: int32(user.UpdatedAt.Nanosecond())},
 		},
 	}), nil
 }
@@ -57,13 +57,13 @@ func (h *handler) GetUserByEmail(ctx context.Context, c *connectgo.Request[userv
 
 	return connectgo.NewResponse(&userv1.GetUserByEmailResponse{
 		User: &userv1.User{
-			Id:        &wrappers.StringValue{Value: user.ID},
-			Username:  &wrappers.StringValue{Value: user.Username},
-			Email:     &wrappers.StringValue{Value: user.Email},
-			IsAdmin:   &wrappers.BoolValue{Value: user.IsAdmin},
-			IsBanned:  &wrappers.BoolValue{Value: user.IsBanned},
-			CreatedAt: &timestamppb.Timestamp{Seconds: int64(user.CreatedAt.Second()), Nanos: int32(user.CreatedAt.Nanosecond())},
-			UpdatedAt: &timestamppb.Timestamp{Seconds: int64(user.UpdatedAt.Second()), Nanos: int32(user.UpdatedAt.Nanosecond())},
+			Id:             &wrappers.StringValue{Value: user.ID},
+			Username:       &wrappers.StringValue{Value: user.Username},
+			Email:          &wrappers.StringValue{Value: user.Email},
+			IsVerified:     &wrappers.BoolValue{Value: user.IsVerified},
+			ProfilePicture: &wrappers.StringValue{Value: user.ProfilePicture},
+			CreatedAt:      &timestamppb.Timestamp{Seconds: int64(user.CreatedAt.Second()), Nanos: int32(user.CreatedAt.Nanosecond())},
+			UpdatedAt:      &timestamppb.Timestamp{Seconds: int64(user.UpdatedAt.Second()), Nanos: int32(user.UpdatedAt.Nanosecond())},
 		},
 	}), nil
 }
@@ -80,13 +80,13 @@ func (h *handler) GetUserByID(ctx context.Context, c *connectgo.Request[userv1.G
 
 	return connectgo.NewResponse(&userv1.GetUserByIDResponse{
 		User: &userv1.User{
-			Id:        &wrappers.StringValue{Value: user.ID},
-			Username:  &wrappers.StringValue{Value: user.Username},
-			Email:     &wrappers.StringValue{Value: user.Email},
-			IsAdmin:   &wrappers.BoolValue{Value: user.IsAdmin},
-			IsBanned:  &wrappers.BoolValue{Value: user.IsBanned},
-			CreatedAt: &timestamppb.Timestamp{Seconds: int64(user.CreatedAt.Second()), Nanos: int32(user.CreatedAt.Nanosecond())},
-			UpdatedAt: &timestamppb.Timestamp{Seconds: int64(user.UpdatedAt.Second()), Nanos: int32(user.UpdatedAt.Nanosecond())},
+			Id:             &wrappers.StringValue{Value: user.ID},
+			Username:       &wrappers.StringValue{Value: user.Username},
+			Email:          &wrappers.StringValue{Value: user.Email},
+			IsVerified:     &wrappers.BoolValue{Value: user.IsVerified},
+			ProfilePicture: &wrappers.StringValue{Value: user.ProfilePicture},
+			CreatedAt:      &timestamppb.Timestamp{Seconds: int64(user.CreatedAt.Second()), Nanos: int32(user.CreatedAt.Nanosecond())},
+			UpdatedAt:      &timestamppb.Timestamp{Seconds: int64(user.UpdatedAt.Second()), Nanos: int32(user.UpdatedAt.Nanosecond())},
 		},
 	}), nil
 }
@@ -103,13 +103,13 @@ func (h *handler) GetUserByUsername(ctx context.Context, c *connectgo.Request[us
 
 	return connectgo.NewResponse(&userv1.GetUserByUsernameResponse{
 		User: &userv1.User{
-			Id:        &wrappers.StringValue{Value: user.ID},
-			Username:  &wrappers.StringValue{Value: user.Username},
-			Email:     &wrappers.StringValue{Value: user.Email},
-			IsAdmin:   &wrappers.BoolValue{Value: user.IsAdmin},
-			IsBanned:  &wrappers.BoolValue{Value: user.IsBanned},
-			CreatedAt: &timestamppb.Timestamp{Seconds: int64(user.CreatedAt.Second()), Nanos: int32(user.CreatedAt.Nanosecond())},
-			UpdatedAt: &timestamppb.Timestamp{Seconds: int64(user.UpdatedAt.Second()), Nanos: int32(user.UpdatedAt.Nanosecond())},
+			Id:             &wrappers.StringValue{Value: user.ID},
+			Username:       &wrappers.StringValue{Value: user.Username},
+			Email:          &wrappers.StringValue{Value: user.Email},
+			IsVerified:     &wrappers.BoolValue{Value: user.IsVerified},
+			ProfilePicture: &wrappers.StringValue{Value: user.ProfilePicture},
+			CreatedAt:      &timestamppb.Timestamp{Seconds: int64(user.CreatedAt.Second()), Nanos: int32(user.CreatedAt.Nanosecond())},
+			UpdatedAt:      &timestamppb.Timestamp{Seconds: int64(user.UpdatedAt.Second()), Nanos: int32(user.UpdatedAt.Nanosecond())},
 		},
 	}), nil
 }

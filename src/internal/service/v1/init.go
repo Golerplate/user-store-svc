@@ -3,14 +3,14 @@ package service_v1
 import (
 	"context"
 
-	"github.com/Golerplate/user-store-svc/internal/datastore"
+	"github.com/golerplate/user-store-svc/internal/database"
 )
 
 type service struct {
-	store datastore.UserStoreServiceDatastore
+	store database.Database
 }
 
-func NewUserStoreService(ctx context.Context, store datastore.UserStoreServiceDatastore) (*service, error) {
+func NewUserStoreService(ctx context.Context, store database.Database) (*service, error) {
 	return &service{
 		store: store,
 	}, nil

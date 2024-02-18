@@ -9,10 +9,11 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
-	"github.com/Golerplate/user-store-svc/internal/config"
-	serviceDatastore "github.com/Golerplate/user-store-svc/internal/datastore/planetscale"
-	handlers_grpc "github.com/Golerplate/user-store-svc/internal/handlers/grpc"
-	service "github.com/Golerplate/user-store-svc/internal/service/v1"
+	"github.com/golerplate/user-store-svc/internal/config"
+	database_connection "github.com/golerplate/user-store-svc/internal/database/connection"
+	database_planetscale "github.com/golerplate/user-store-svc/internal/database/pgx"
+	handlers_grpc "github.com/golerplate/user-store-svc/internal/handlers/grpc"
+	service "github.com/golerplate/user-store-svc/internal/service/v1"
 )
 
 func main() {
@@ -27,7 +28,8 @@ func main() {
 
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 
-	userStoreServiceDatastore := serviceDatastore.NewPlanetScaleDatastore()
+	databaseConnection := database_connection.NewDatabaseConnection(ctx, cfg)
+	userStoreServiceDatastore := database_planetscale.NewPlanetScaleDatastore(databaseConnection)
 	userStoreService, err := service.NewUserStoreService(ctx, userStoreServiceDatastore)
 	if err != nil {
 		log.Fatal().Err(err).
