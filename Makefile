@@ -4,5 +4,5 @@ run:
 update:
 	cd src && go mod tidy
 
-test:
-	cd src/tests/integration && go test -v
+unit-test:
+	cd src && go test -v -cover ./...

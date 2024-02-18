@@ -6,13 +6,13 @@ import (
 	"net/http"
 
 	"github.com/Golerplate/contracts/generated/services/servicesconnect"
-	"github.com/Golerplate/contracts/generated/services/user/store/v1/storev1connect"
+	"github.com/Golerplate/contracts/generated/services/user/store/svc/v1/svcv1connect"
 	"github.com/Golerplate/pkg/grpc"
 	pkghandlers "github.com/Golerplate/pkg/grpc/handlers"
 	sharedmidlewares "github.com/Golerplate/pkg/grpc/interceptors"
 	"github.com/Golerplate/user-store-svc/internal/handlers"
 	handlers_grpc_user_v1 "github.com/Golerplate/user-store-svc/internal/handlers/grpc/user/v1"
-	"github.com/Golerplate/user-store-svc/internal/service"
+	service "github.com/Golerplate/user-store-svc/internal/service/v1"
 	connectgo "github.com/bufbuild/connect-go"
 	grpcreflect "github.com/bufbuild/connect-grpcreflect-go"
 	"github.com/rs/zerolog/log"
@@ -47,7 +47,7 @@ func (s *grpcServer) Setup(ctx context.Context) error {
 
 	mux := http.NewServeMux()
 	mux.Handle(servicesconnect.NewHealthServiceHandler(pkghandlers.NewHealthHandler()))
-	mux.Handle(storev1connect.NewUserStoreSvcHandler(userStoreServiceHandler, interceptors))
+	mux.Handle(svcv1connect.NewUserStoreSvcHandler(userStoreServiceHandler, interceptors))
 	mux.Handle(grpcreflect.NewHandlerV1(reflector))
 	mux.Handle(grpcreflect.NewHandlerV1Alpha(reflector))
 

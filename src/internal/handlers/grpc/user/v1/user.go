@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	userv1 "github.com/Golerplate/contracts/generated/services/user/store/v1"
+	userv1 "github.com/Golerplate/contracts/generated/services/user/store/svc/v1"
 	"github.com/Golerplate/pkg/grpc"
 	entities_user_v1 "github.com/Golerplate/user-store-svc/internal/entities/user/v1"
 	connectgo "github.com/bufbuild/connect-go"
@@ -13,7 +13,6 @@ import (
 )
 
 func (h *handler) CreateUser(ctx context.Context, c *connectgo.Request[userv1.CreateUserRequest]) (*connectgo.Response[userv1.CreateUserResponse], error) {
-
 	if c.Msg.GetUsername() == nil || c.Msg.GetUsername().GetValue() == "" {
 		return nil, connectgo.NewError(connectgo.CodeInvalidArgument, errors.New("invalid username"))
 	}
@@ -34,6 +33,75 @@ func (h *handler) CreateUser(ctx context.Context, c *connectgo.Request[userv1.Cr
 	}
 
 	return connectgo.NewResponse(&userv1.CreateUserResponse{
+		User: &userv1.User{
+			Id:        &wrappers.StringValue{Value: user.ID},
+			Username:  &wrappers.StringValue{Value: user.Username},
+			Email:     &wrappers.StringValue{Value: user.Email},
+			IsAdmin:   &wrappers.BoolValue{Value: user.IsAdmin},
+			IsBanned:  &wrappers.BoolValue{Value: user.IsBanned},
+			CreatedAt: &timestamppb.Timestamp{Seconds: int64(user.CreatedAt.Second()), Nanos: int32(user.CreatedAt.Nanosecond())},
+			UpdatedAt: &timestamppb.Timestamp{Seconds: int64(user.UpdatedAt.Second()), Nanos: int32(user.UpdatedAt.Nanosecond())},
+		},
+	}), nil
+}
+
+func (h *handler) GetUserByEmail(ctx context.Context, c *connectgo.Request[userv1.GetUserByEmailRequest]) (*connectgo.Response[userv1.GetUserByEmailResponse], error) {
+	if c.Msg.GetEmail() == nil || c.Msg.GetEmail().GetValue() == "" {
+		return nil, connectgo.NewError(connectgo.CodeInvalidArgument, errors.New("invalid email"))
+	}
+
+	user, err := h.userStoreService.GetUserByEmail(ctx, c.Msg.GetEmail().GetValue())
+	if err != nil {
+		return nil, grpc.TranslateToGRPCError(ctx, err)
+	}
+
+	return connectgo.NewResponse(&userv1.GetUserByEmailResponse{
+		User: &userv1.User{
+			Id:        &wrappers.StringValue{Value: user.ID},
+			Username:  &wrappers.StringValue{Value: user.Username},
+			Email:     &wrappers.StringValue{Value: user.Email},
+			IsAdmin:   &wrappers.BoolValue{Value: user.IsAdmin},
+			IsBanned:  &wrappers.BoolValue{Value: user.IsBanned},
+			CreatedAt: &timestamppb.Timestamp{Seconds: int64(user.CreatedAt.Second()), Nanos: int32(user.CreatedAt.Nanosecond())},
+			UpdatedAt: &timestamppb.Timestamp{Seconds: int64(user.UpdatedAt.Second()), Nanos: int32(user.UpdatedAt.Nanosecond())},
+		},
+	}), nil
+}
+
+func (h *handler) GetUserByID(ctx context.Context, c *connectgo.Request[userv1.GetUserByIDRequest]) (*connectgo.Response[userv1.GetUserByIDResponse], error) {
+	if c.Msg.GetId() == nil || c.Msg.GetId().GetValue() == "" {
+		return nil, connectgo.NewError(connectgo.CodeInvalidArgument, errors.New("invalid id"))
+	}
+
+	user, err := h.userStoreService.GetUserByID(ctx, c.Msg.GetId().GetValue())
+	if err != nil {
+		return nil, grpc.TranslateToGRPCError(ctx, err)
+	}
+
+	return connectgo.NewResponse(&userv1.GetUserByIDResponse{
+		User: &userv1.User{
+			Id:        &wrappers.StringValue{Value: user.ID},
+			Username:  &wrappers.StringValue{Value: user.Username},
+			Email:     &wrappers.StringValue{Value: user.Email},
+			IsAdmin:   &wrappers.BoolValue{Value: user.IsAdmin},
+			IsBanned:  &wrappers.BoolValue{Value: user.IsBanned},
+			CreatedAt: &timestamppb.Timestamp{Seconds: int64(user.CreatedAt.Second()), Nanos: int32(user.CreatedAt.Nanosecond())},
+			UpdatedAt: &timestamppb.Timestamp{Seconds: int64(user.UpdatedAt.Second()), Nanos: int32(user.UpdatedAt.Nanosecond())},
+		},
+	}), nil
+}
+
+func (h *handler) GetUserByUsername(ctx context.Context, c *connectgo.Request[userv1.GetUserByUsernameRequest]) (*connectgo.Response[userv1.GetUserByUsernameResponse], error) {
+	if c.Msg.GetUsername() == nil || c.Msg.GetUsername().GetValue() == "" {
+		return nil, connectgo.NewError(connectgo.CodeInvalidArgument, errors.New("invalid username"))
+	}
+
+	user, err := h.userStoreService.GetUserByUsername(ctx, c.Msg.GetUsername().GetValue())
+	if err != nil {
+		return nil, grpc.TranslateToGRPCError(ctx, err)
+	}
+
+	return connectgo.NewResponse(&userv1.GetUserByUsernameResponse{
 		User: &userv1.User{
 			Id:        &wrappers.StringValue{Value: user.ID},
 			Username:  &wrappers.StringValue{Value: user.Username},

@@ -10,9 +10,9 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/Golerplate/user-store-svc/internal/config"
+	serviceDatastore "github.com/Golerplate/user-store-svc/internal/datastore/planetscale"
 	handlers_grpc "github.com/Golerplate/user-store-svc/internal/handlers/grpc"
-	"github.com/Golerplate/user-store-svc/internal/service"
-	serviceDatastore "github.com/Golerplate/user-store-svc/internal/service/datastore/planetscale"
+	service "github.com/Golerplate/user-store-svc/internal/service/v1"
 )
 
 func main() {
@@ -28,7 +28,11 @@ func main() {
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 
 	userStoreServiceDatastore := serviceDatastore.NewPlanetScaleDatastore()
-	userStoreService := service.NewUserStoreService(userStoreServiceDatastore)
+	userStoreService, err := service.NewUserStoreService(ctx, userStoreServiceDatastore)
+	if err != nil {
+		log.Fatal().Err(err).
+			Msg("main: unable to create user store service")
+	}
 
 	grpcServer, err := handlers_grpc.NewServer(ctx, cfg.GRPCServerConfig, userStoreService)
 	if err != nil {
