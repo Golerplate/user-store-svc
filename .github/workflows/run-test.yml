@@ -25,7 +25,9 @@ jobs:
         go test -count=2 -v ./...
 
     - name: Generate Coverage Profile
-      run: go test -coverprofile=coverage.out ./...
+      run: |
+        cd src
+        go test -coverprofile=coverage.out ./...
 
     - name: Display Coverage Percentage
       run: |
