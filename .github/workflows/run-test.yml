@@ -21,7 +21,7 @@ jobs:
 
     - name: Run Tests
       run: |
-        cd src/tests/integration
+        cd src
         go test -count=2 -v ./...
 
     - name: Generate Coverage Profile
