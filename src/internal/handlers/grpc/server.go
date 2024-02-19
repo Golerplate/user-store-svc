@@ -7,6 +7,8 @@ import (
 
 	connectgo "github.com/bufbuild/connect-go"
 	grpcreflect "github.com/bufbuild/connect-grpcreflect-go"
+	"github.com/golerplate/contracts/generated/services"
+	"github.com/golerplate/contracts/generated/services/servicesconnect"
 	"github.com/golerplate/contracts/generated/services/user/store/svc/v1/svcv1connect"
 	"github.com/golerplate/pkg/grpc"
 	sharedmidlewares "github.com/golerplate/pkg/grpc/interceptors"
@@ -17,6 +19,16 @@ import (
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 )
+
+type health struct{}
+
+func (h *health) CheckHealth(ctx context.Context, c *connectgo.Request[services.HealthRequest]) (*connectgo.Response[services.HealthResponse], error) {
+	return connectgo.NewResponse(&services.HealthResponse{}), nil
+}
+
+func NewHealthHandler() servicesconnect.HealthServiceHandler {
+	return &health{}
+}
 
 type grpcServer struct {
 	grpcServer *http.Server
@@ -35,7 +47,11 @@ func (s *grpcServer) Setup(ctx context.Context) error {
 	log.Info().
 		Msg("handlers.grpc.grpcServer.Setup: Setting up gRPC server...")
 
-	userStoreServiceHandler := handlers_grpc_user_v1.NewUserStoreServiceHandler(s.service)
+	userStoreServiceHandler, err := handlers_grpc_user_v1.NewUserStoreServiceHandler(ctx, s.service)
+	if err != nil {
+		log.Fatal().Err(err).
+			Msg("main: unable to create user store service handler")
+	}
 
 	interceptors := connectgo.WithInterceptors(sharedmidlewares.ServerDefaultChain()...)
 
@@ -44,6 +60,7 @@ func (s *grpcServer) Setup(ctx context.Context) error {
 	)
 
 	mux := http.NewServeMux()
+	mux.Handle(servicesconnect.NewHealthServiceHandler(NewHealthHandler()))
 	mux.Handle(svcv1connect.NewUserStoreSvcHandler(userStoreServiceHandler, interceptors))
 	mux.Handle(grpcreflect.NewHandlerV1(reflector))
 	mux.Handle(grpcreflect.NewHandlerV1Alpha(reflector))

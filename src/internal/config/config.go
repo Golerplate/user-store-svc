@@ -12,11 +12,11 @@ type Config struct {
 }
 
 type DatabaseConfig struct {
-	Host     string `env:"DB_HOST" envDefault:"127.0.0.1"`
-	Username string `env:"DB_USER" envDefault:"root"`
-	Password string `env:"DB_PASSWORD" envDefault:"root"`
-	DBName   string `env:"DB_NAME" envDefault:"user-store-db"`
-	Port     uint16 `env:"DB_PORT" envDefault:"5432"`
+	Host     string `env:"DB_HOST"`
+	Username string `env:"DB_USER"`
+	Password string `env:"DB_PASSWORD"`
+	DBName   string `env:"DB_NAME"`
+	Port     uint16 `env:"DB_PORT"`
 }
 
 type GeneralConfig struct {
