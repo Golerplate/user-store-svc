@@ -41,3 +41,12 @@ func (s *service) GetUserByUsername(ctx context.Context, username string) (*enti
 
 	return user, nil
 }
+
+func (s *service) ChangePassword(ctx context.Context, userID, oldPassword, newPassword string) error {
+	err := s.store.ChangePassword(ctx, userID, oldPassword, newPassword)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

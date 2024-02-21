@@ -34,13 +34,14 @@ func (h *handler) CreateUser(ctx context.Context, c *connectgo.Request[userv1.Cr
 
 	return connectgo.NewResponse(&userv1.CreateUserResponse{
 		User: &userv1.User{
-			Id:             &wrappers.StringValue{Value: user.ID},
-			Username:       &wrappers.StringValue{Value: user.Username},
-			Email:          &wrappers.StringValue{Value: user.Email},
-			IsVerified:     &wrappers.BoolValue{Value: user.IsVerified},
-			ProfilePicture: &wrappers.StringValue{Value: user.ProfilePicture},
-			CreatedAt:      &timestamppb.Timestamp{Seconds: int64(user.CreatedAt.Second()), Nanos: int32(user.CreatedAt.Nanosecond())},
-			UpdatedAt:      &timestamppb.Timestamp{Seconds: int64(user.UpdatedAt.Second()), Nanos: int32(user.UpdatedAt.Nanosecond())},
+			Id:               &wrappers.StringValue{Value: user.ID},
+			Username:         &wrappers.StringValue{Value: user.Username},
+			Email:            &wrappers.StringValue{Value: user.Email},
+			IsAdmin:          &wrappers.BoolValue{Value: user.IsAdmin},
+			IsBanned:         &wrappers.BoolValue{Value: user.IsBanned},
+			HasVerifiedEmail: &wrappers.BoolValue{Value: user.HasVerifiedEmail},
+			CreatedAt:        &timestamppb.Timestamp{Seconds: int64(user.CreatedAt.Second()), Nanos: int32(user.CreatedAt.Nanosecond())},
+			UpdatedAt:        &timestamppb.Timestamp{Seconds: int64(user.UpdatedAt.Second()), Nanos: int32(user.UpdatedAt.Nanosecond())},
 		},
 	}), nil
 }
@@ -57,13 +58,14 @@ func (h *handler) GetUserByEmail(ctx context.Context, c *connectgo.Request[userv
 
 	return connectgo.NewResponse(&userv1.GetUserByEmailResponse{
 		User: &userv1.User{
-			Id:             &wrappers.StringValue{Value: user.ID},
-			Username:       &wrappers.StringValue{Value: user.Username},
-			Email:          &wrappers.StringValue{Value: user.Email},
-			IsVerified:     &wrappers.BoolValue{Value: user.IsVerified},
-			ProfilePicture: &wrappers.StringValue{Value: user.ProfilePicture},
-			CreatedAt:      &timestamppb.Timestamp{Seconds: int64(user.CreatedAt.Second()), Nanos: int32(user.CreatedAt.Nanosecond())},
-			UpdatedAt:      &timestamppb.Timestamp{Seconds: int64(user.UpdatedAt.Second()), Nanos: int32(user.UpdatedAt.Nanosecond())},
+			Id:               &wrappers.StringValue{Value: user.ID},
+			Username:         &wrappers.StringValue{Value: user.Username},
+			Email:            &wrappers.StringValue{Value: user.Email},
+			IsAdmin:          &wrappers.BoolValue{Value: user.IsAdmin},
+			IsBanned:         &wrappers.BoolValue{Value: user.IsBanned},
+			HasVerifiedEmail: &wrappers.BoolValue{Value: user.HasVerifiedEmail},
+			CreatedAt:        &timestamppb.Timestamp{Seconds: int64(user.CreatedAt.Second()), Nanos: int32(user.CreatedAt.Nanosecond())},
+			UpdatedAt:        &timestamppb.Timestamp{Seconds: int64(user.UpdatedAt.Second()), Nanos: int32(user.UpdatedAt.Nanosecond())},
 		},
 	}), nil
 }
@@ -80,13 +82,14 @@ func (h *handler) GetUserByID(ctx context.Context, c *connectgo.Request[userv1.G
 
 	return connectgo.NewResponse(&userv1.GetUserByIDResponse{
 		User: &userv1.User{
-			Id:             &wrappers.StringValue{Value: user.ID},
-			Username:       &wrappers.StringValue{Value: user.Username},
-			Email:          &wrappers.StringValue{Value: user.Email},
-			IsVerified:     &wrappers.BoolValue{Value: user.IsVerified},
-			ProfilePicture: &wrappers.StringValue{Value: user.ProfilePicture},
-			CreatedAt:      &timestamppb.Timestamp{Seconds: int64(user.CreatedAt.Second()), Nanos: int32(user.CreatedAt.Nanosecond())},
-			UpdatedAt:      &timestamppb.Timestamp{Seconds: int64(user.UpdatedAt.Second()), Nanos: int32(user.UpdatedAt.Nanosecond())},
+			Id:               &wrappers.StringValue{Value: user.ID},
+			Username:         &wrappers.StringValue{Value: user.Username},
+			Email:            &wrappers.StringValue{Value: user.Email},
+			IsAdmin:          &wrappers.BoolValue{Value: user.IsAdmin},
+			IsBanned:         &wrappers.BoolValue{Value: user.IsBanned},
+			HasVerifiedEmail: &wrappers.BoolValue{Value: user.HasVerifiedEmail},
+			CreatedAt:        &timestamppb.Timestamp{Seconds: int64(user.CreatedAt.Second()), Nanos: int32(user.CreatedAt.Nanosecond())},
+			UpdatedAt:        &timestamppb.Timestamp{Seconds: int64(user.UpdatedAt.Second()), Nanos: int32(user.UpdatedAt.Nanosecond())},
 		},
 	}), nil
 }
@@ -103,13 +106,33 @@ func (h *handler) GetUserByUsername(ctx context.Context, c *connectgo.Request[us
 
 	return connectgo.NewResponse(&userv1.GetUserByUsernameResponse{
 		User: &userv1.User{
-			Id:             &wrappers.StringValue{Value: user.ID},
-			Username:       &wrappers.StringValue{Value: user.Username},
-			Email:          &wrappers.StringValue{Value: user.Email},
-			IsVerified:     &wrappers.BoolValue{Value: user.IsVerified},
-			ProfilePicture: &wrappers.StringValue{Value: user.ProfilePicture},
-			CreatedAt:      &timestamppb.Timestamp{Seconds: int64(user.CreatedAt.Second()), Nanos: int32(user.CreatedAt.Nanosecond())},
-			UpdatedAt:      &timestamppb.Timestamp{Seconds: int64(user.UpdatedAt.Second()), Nanos: int32(user.UpdatedAt.Nanosecond())},
+			Id:               &wrappers.StringValue{Value: user.ID},
+			Username:         &wrappers.StringValue{Value: user.Username},
+			Email:            &wrappers.StringValue{Value: user.Email},
+			IsAdmin:          &wrappers.BoolValue{Value: user.IsAdmin},
+			IsBanned:         &wrappers.BoolValue{Value: user.IsBanned},
+			HasVerifiedEmail: &wrappers.BoolValue{Value: user.HasVerifiedEmail},
+			CreatedAt:        &timestamppb.Timestamp{Seconds: int64(user.CreatedAt.Second()), Nanos: int32(user.CreatedAt.Nanosecond())},
+			UpdatedAt:        &timestamppb.Timestamp{Seconds: int64(user.UpdatedAt.Second()), Nanos: int32(user.UpdatedAt.Nanosecond())},
 		},
 	}), nil
+}
+
+func (h *handler) ChangePassword(ctx context.Context, c *connectgo.Request[userv1.ChangePasswordRequest]) (*connectgo.Response[userv1.ChangePasswordResponse], error) {
+	if c.Msg.GetUserId() == nil || c.Msg.GetUserId().GetValue() == "" {
+		return nil, connectgo.NewError(connectgo.CodeInvalidArgument, errors.New("invalid user_id"))
+	}
+	if c.Msg.GetOldPassword() == nil || c.Msg.GetOldPassword().GetValue() == "" {
+		return nil, connectgo.NewError(connectgo.CodeInvalidArgument, errors.New("invalid old_password"))
+	}
+	if c.Msg.GetNewPassword() == nil || c.Msg.GetNewPassword().GetValue() == "" {
+		return nil, connectgo.NewError(connectgo.CodeInvalidArgument, errors.New("invalid new_password"))
+	}
+
+	err := h.userStoreService.ChangePassword(ctx, c.Msg.GetUserId().GetValue(), c.Msg.GetOldPassword().GetValue(), c.Msg.GetNewPassword().GetValue())
+	if err != nil {
+		return nil, grpc.TranslateToGRPCError(ctx, err)
+	}
+
+	return connectgo.NewResponse(&userv1.ChangePasswordResponse{}), nil
 }

@@ -7,7 +7,7 @@ require (
 	github.com/bufbuild/connect-grpcreflect-go v1.1.0
 	github.com/caarlos0/env/v8 v8.0.0
 	github.com/golang/protobuf v1.5.3
-	github.com/golerplate/contracts v0.0.9
+	github.com/golerplate/contracts v0.0.11
 	github.com/golerplate/pkg v0.0.9
 	github.com/rs/zerolog v1.32.0
 	github.com/stretchr/testify v1.8.4
@@ -15,6 +15,8 @@ require (
 	golang.org/x/net v0.21.0
 	google.golang.org/protobuf v1.32.0
 )
+
+require golang.org/x/crypto v0.19.0
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect

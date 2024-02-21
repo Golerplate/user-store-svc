@@ -27,13 +27,14 @@ func Test_CreateUser(t *testing.T) {
 			Email:    "testuser@test.com",
 			Password: "123",
 		}).Return(&entities_user_v1.User{
-			ID:             userid,
-			Username:       "testuser",
-			Email:          "testuser@test.com",
-			IsVerified:     false,
-			ProfilePicture: "",
-			CreatedAt:      created,
-			UpdatedAt:      created,
+			ID:               userid,
+			Username:         "testuser",
+			Email:            "testuser@test.com",
+			IsAdmin:          false,
+			IsBanned:         false,
+			HasVerifiedEmail: false,
+			CreatedAt:        created,
+			UpdatedAt:        created,
 		}, nil)
 
 		s, err := NewUserStoreService(context.Background(), m)
@@ -89,13 +90,14 @@ func Test_GetUserByEmail(t *testing.T) {
 		created := time.Now()
 
 		m.EXPECT().GetUserByEmail(gomock.Any(), "testuser@test.com").Return(&entities_user_v1.User{
-			ID:             userid,
-			Username:       "testuser",
-			Email:          "testuser@test.com",
-			IsVerified:     false,
-			ProfilePicture: "",
-			CreatedAt:      created,
-			UpdatedAt:      created,
+			ID:               userid,
+			Username:         "testuser",
+			Email:            "testuser@test.com",
+			IsAdmin:          false,
+			IsBanned:         false,
+			HasVerifiedEmail: false,
+			CreatedAt:        created,
+			UpdatedAt:        created,
 		}, nil)
 
 		s, err := NewUserStoreService(context.Background(), m)
@@ -107,13 +109,14 @@ func Test_GetUserByEmail(t *testing.T) {
 		assert.NoError(t, err)
 
 		assert.EqualValues(t, &entities_user_v1.User{
-			ID:             userid,
-			Username:       "testuser",
-			Email:          "testuser@test.com",
-			IsVerified:     false,
-			ProfilePicture: "",
-			CreatedAt:      created,
-			UpdatedAt:      created,
+			ID:               userid,
+			Username:         "testuser",
+			Email:            "testuser@test.com",
+			IsAdmin:          false,
+			IsBanned:         false,
+			HasVerifiedEmail: false,
+			CreatedAt:        created,
+			UpdatedAt:        created,
 		}, user)
 	})
 	t.Run("not found - get user by email", func(t *testing.T) {
@@ -155,13 +158,14 @@ func Test_GetUserByID(t *testing.T) {
 		created := time.Now()
 
 		m.EXPECT().GetUserByID(gomock.Any(), userid).Return(&entities_user_v1.User{
-			ID:             userid,
-			Username:       "testuser",
-			Email:          "testuser@test.com",
-			IsVerified:     false,
-			ProfilePicture: "",
-			CreatedAt:      created,
-			UpdatedAt:      created,
+			ID:               userid,
+			Username:         "testuser",
+			Email:            "testuser@test.com",
+			IsAdmin:          false,
+			IsBanned:         false,
+			HasVerifiedEmail: false,
+			CreatedAt:        created,
+			UpdatedAt:        created,
 		}, nil)
 
 		s, err := NewUserStoreService(context.Background(), m)
@@ -173,13 +177,14 @@ func Test_GetUserByID(t *testing.T) {
 		assert.NoError(t, err)
 
 		assert.EqualValues(t, &entities_user_v1.User{
-			ID:             userid,
-			Username:       "testuser",
-			Email:          "testuser@test.com",
-			IsVerified:     false,
-			ProfilePicture: "",
-			CreatedAt:      created,
-			UpdatedAt:      created,
+			ID:               userid,
+			Username:         "testuser",
+			Email:            "testuser@test.com",
+			IsAdmin:          false,
+			IsBanned:         false,
+			HasVerifiedEmail: false,
+			CreatedAt:        created,
+			UpdatedAt:        created,
 		}, user)
 	})
 	t.Run("not found - get user by id", func(t *testing.T) {
@@ -221,13 +226,14 @@ func Test_GetUserByUsername(t *testing.T) {
 		created := time.Now()
 
 		m.EXPECT().GetUserByUsername(gomock.Any(), "testuser").Return(&entities_user_v1.User{
-			ID:             userid,
-			Username:       "testuser",
-			Email:          "testuser@test.com",
-			IsVerified:     false,
-			ProfilePicture: "",
-			CreatedAt:      created,
-			UpdatedAt:      created,
+			ID:               userid,
+			Username:         "testuser",
+			Email:            "testuser@test.com",
+			IsAdmin:          false,
+			IsBanned:         false,
+			HasVerifiedEmail: false,
+			CreatedAt:        created,
+			UpdatedAt:        created,
 		}, nil)
 
 		s, err := NewUserStoreService(context.Background(), m)
@@ -239,13 +245,14 @@ func Test_GetUserByUsername(t *testing.T) {
 		assert.NoError(t, err)
 
 		assert.EqualValues(t, &entities_user_v1.User{
-			ID:             userid,
-			Username:       "testuser",
-			Email:          "testuser@test.com",
-			IsVerified:     false,
-			ProfilePicture: "",
-			CreatedAt:      created,
-			UpdatedAt:      created,
+			ID:               userid,
+			Username:         "testuser",
+			Email:            "testuser@test.com",
+			IsAdmin:          false,
+			IsBanned:         false,
+			HasVerifiedEmail: false,
+			CreatedAt:        created,
+			UpdatedAt:        created,
 		}, user)
 	})
 	t.Run("not found - get user by username", func(t *testing.T) {
@@ -274,6 +281,38 @@ func Test_GetUserByUsername(t *testing.T) {
 
 		user, err := s.GetUserByUsername(context.Background(), "testtesttest")
 		assert.Nil(t, user)
+		assert.Error(t, err)
+	})
+}
+
+func Test_ChangePassword(t *testing.T) {
+	t.Run("ok - change password", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		m := database_mocks.NewMockDatabase(ctrl)
+
+		userid := constants.GenerateDataPrefixWithULID(constants.User)
+
+		m.EXPECT().ChangePassword(gomock.Any(), userid, "password", "newpassword").Return(nil)
+
+		s, err := NewUserStoreService(context.Background(), m)
+		assert.NotNil(t, s)
+		assert.NoError(t, err)
+
+		err = s.ChangePassword(context.Background(), userid, "password", "newpassword")
+		assert.NoError(t, err)
+
+	})
+	t.Run("not found - change password", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		m := database_mocks.NewMockDatabase(ctrl)
+
+		m.EXPECT().ChangePassword(gomock.Any(), "user_023UN139", "password", "newpassword").Return(pkgerrors.NewInternalServerError("failed to change password"))
+
+		s, err := NewUserStoreService(context.Background(), m)
+		assert.NotNil(t, s)
+		assert.NoError(t, err)
+
+		err = s.ChangePassword(context.Background(), "user_023UN139", "password", "newpassword")
 		assert.Error(t, err)
 	})
 }

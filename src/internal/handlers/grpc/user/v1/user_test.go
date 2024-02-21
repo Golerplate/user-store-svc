@@ -32,13 +32,14 @@ func Test_CreateUser(t *testing.T) {
 			Email:    "testuser@test.com",
 			Password: "123",
 		}).Return(&entities_user_v1.User{
-			ID:             userid,
-			Username:       "testuser",
-			Email:          "testuser@test.com",
-			IsVerified:     false,
-			ProfilePicture: "",
-			CreatedAt:      created,
-			UpdatedAt:      created,
+			ID:               userid,
+			Username:         "testuser",
+			Email:            "testuser@test.com",
+			IsAdmin:          false,
+			IsBanned:         false,
+			HasVerifiedEmail: false,
+			CreatedAt:        created,
+			UpdatedAt:        created,
 		}, nil)
 
 		h, err := NewUserStoreServiceHandler(context.Background(), m)
@@ -59,13 +60,14 @@ func Test_CreateUser(t *testing.T) {
 
 		assert.EqualValues(t, connectgo.NewResponse(&userv1.CreateUserResponse{
 			User: &userv1.User{
-				Id:             &wrappers.StringValue{Value: userid},
-				Username:       &wrappers.StringValue{Value: "testuser"},
-				Email:          &wrappers.StringValue{Value: "testuser@test.com"},
-				IsVerified:     &wrappers.BoolValue{Value: false},
-				ProfilePicture: &wrappers.StringValue{Value: ""},
-				CreatedAt:      &timestamppb.Timestamp{Seconds: int64(created.Second()), Nanos: int32(created.Nanosecond())},
-				UpdatedAt:      &timestamppb.Timestamp{Seconds: int64(created.Second()), Nanos: int32(created.Nanosecond())},
+				Id:               &wrappers.StringValue{Value: userid},
+				Username:         &wrappers.StringValue{Value: "testuser"},
+				Email:            &wrappers.StringValue{Value: "testuser@test.com"},
+				IsAdmin:          &wrappers.BoolValue{Value: false},
+				IsBanned:         &wrappers.BoolValue{Value: false},
+				HasVerifiedEmail: &wrappers.BoolValue{Value: false},
+				CreatedAt:        &timestamppb.Timestamp{Seconds: int64(created.Second()), Nanos: int32(created.Nanosecond())},
+				UpdatedAt:        &timestamppb.Timestamp{Seconds: int64(created.Second()), Nanos: int32(created.Nanosecond())},
 			},
 		}), user)
 	})
@@ -169,13 +171,14 @@ func Test_GetUserByEmail(t *testing.T) {
 		created := time.Now()
 
 		m.EXPECT().GetUserByEmail(gomock.Any(), "testuser@test.com").Return(&entities_user_v1.User{
-			ID:             userid,
-			Username:       "testuser",
-			Email:          "testuser@test.com",
-			IsVerified:     false,
-			ProfilePicture: "",
-			CreatedAt:      created,
-			UpdatedAt:      created,
+			ID:               userid,
+			Username:         "testuser",
+			Email:            "testuser@test.com",
+			IsAdmin:          false,
+			IsBanned:         false,
+			HasVerifiedEmail: false,
+			CreatedAt:        created,
+			UpdatedAt:        created,
 		}, nil)
 
 		h, err := NewUserStoreServiceHandler(context.Background(), m)
@@ -194,13 +197,14 @@ func Test_GetUserByEmail(t *testing.T) {
 
 		assert.EqualValues(t, connectgo.NewResponse(&userv1.GetUserByEmailResponse{
 			User: &userv1.User{
-				Id:             &wrappers.StringValue{Value: userid},
-				Username:       &wrappers.StringValue{Value: "testuser"},
-				Email:          &wrappers.StringValue{Value: "testuser@test.com"},
-				IsVerified:     &wrappers.BoolValue{Value: false},
-				ProfilePicture: &wrappers.StringValue{Value: ""},
-				CreatedAt:      &timestamppb.Timestamp{Seconds: int64(created.Second()), Nanos: int32(created.Nanosecond())},
-				UpdatedAt:      &timestamppb.Timestamp{Seconds: int64(created.Second()), Nanos: int32(created.Nanosecond())},
+				Id:               &wrappers.StringValue{Value: userid},
+				Username:         &wrappers.StringValue{Value: "testuser"},
+				Email:            &wrappers.StringValue{Value: "testuser@test.com"},
+				IsAdmin:          &wrappers.BoolValue{Value: false},
+				IsBanned:         &wrappers.BoolValue{Value: false},
+				HasVerifiedEmail: &wrappers.BoolValue{Value: false},
+				CreatedAt:        &timestamppb.Timestamp{Seconds: int64(created.Second()), Nanos: int32(created.Nanosecond())},
+				UpdatedAt:        &timestamppb.Timestamp{Seconds: int64(created.Second()), Nanos: int32(created.Nanosecond())},
 			},
 		}), user)
 	})
@@ -254,13 +258,14 @@ func Test_GetUserByID(t *testing.T) {
 		created := time.Now()
 
 		m.EXPECT().GetUserByID(gomock.Any(), userid).Return(&entities_user_v1.User{
-			ID:             userid,
-			Username:       "testuser",
-			Email:          "testuser@test.com",
-			IsVerified:     false,
-			ProfilePicture: "",
-			CreatedAt:      created,
-			UpdatedAt:      created,
+			ID:               userid,
+			Username:         "testuser",
+			Email:            "testuser@test.com",
+			IsAdmin:          false,
+			IsBanned:         false,
+			HasVerifiedEmail: false,
+			CreatedAt:        created,
+			UpdatedAt:        created,
 		}, nil)
 
 		h, err := NewUserStoreServiceHandler(context.Background(), m)
@@ -279,13 +284,14 @@ func Test_GetUserByID(t *testing.T) {
 
 		assert.EqualValues(t, connectgo.NewResponse(&userv1.GetUserByIDResponse{
 			User: &userv1.User{
-				Id:             &wrappers.StringValue{Value: userid},
-				Username:       &wrappers.StringValue{Value: "testuser"},
-				Email:          &wrappers.StringValue{Value: "testuser@test.com"},
-				IsVerified:     &wrappers.BoolValue{Value: false},
-				ProfilePicture: &wrappers.StringValue{Value: ""},
-				CreatedAt:      &timestamppb.Timestamp{Seconds: int64(created.Second()), Nanos: int32(created.Nanosecond())},
-				UpdatedAt:      &timestamppb.Timestamp{Seconds: int64(created.Second()), Nanos: int32(created.Nanosecond())},
+				Id:               &wrappers.StringValue{Value: userid},
+				Username:         &wrappers.StringValue{Value: "testuser"},
+				Email:            &wrappers.StringValue{Value: "testuser@test.com"},
+				IsAdmin:          &wrappers.BoolValue{Value: false},
+				IsBanned:         &wrappers.BoolValue{Value: false},
+				HasVerifiedEmail: &wrappers.BoolValue{Value: false},
+				CreatedAt:        &timestamppb.Timestamp{Seconds: int64(created.Second()), Nanos: int32(created.Nanosecond())},
+				UpdatedAt:        &timestamppb.Timestamp{Seconds: int64(created.Second()), Nanos: int32(created.Nanosecond())},
 			},
 		}), user)
 	})
@@ -341,13 +347,14 @@ func Test_GetUserByUsername(t *testing.T) {
 		created := time.Now()
 
 		m.EXPECT().GetUserByUsername(gomock.Any(), "testuser").Return(&entities_user_v1.User{
-			ID:             userid,
-			Username:       "testuser",
-			Email:          "testuser@test.com",
-			IsVerified:     false,
-			ProfilePicture: "",
-			CreatedAt:      created,
-			UpdatedAt:      created,
+			ID:               userid,
+			Username:         "testuser",
+			Email:            "testuser@test.com",
+			IsAdmin:          false,
+			IsBanned:         false,
+			HasVerifiedEmail: false,
+			CreatedAt:        created,
+			UpdatedAt:        created,
 		}, nil)
 
 		h, err := NewUserStoreServiceHandler(context.Background(), m)
@@ -366,13 +373,14 @@ func Test_GetUserByUsername(t *testing.T) {
 
 		assert.EqualValues(t, connectgo.NewResponse(&userv1.GetUserByUsernameResponse{
 			User: &userv1.User{
-				Id:             &wrappers.StringValue{Value: userid},
-				Username:       &wrappers.StringValue{Value: "testuser"},
-				Email:          &wrappers.StringValue{Value: "testuser@test.com"},
-				IsVerified:     &wrappers.BoolValue{Value: false},
-				ProfilePicture: &wrappers.StringValue{Value: ""},
-				CreatedAt:      &timestamppb.Timestamp{Seconds: int64(created.Second()), Nanos: int32(created.Nanosecond())},
-				UpdatedAt:      &timestamppb.Timestamp{Seconds: int64(created.Second()), Nanos: int32(created.Nanosecond())},
+				Id:               &wrappers.StringValue{Value: userid},
+				Username:         &wrappers.StringValue{Value: "testuser"},
+				Email:            &wrappers.StringValue{Value: "testuser@test.com"},
+				IsAdmin:          &wrappers.BoolValue{Value: false},
+				IsBanned:         &wrappers.BoolValue{Value: false},
+				HasVerifiedEmail: &wrappers.BoolValue{Value: false},
+				CreatedAt:        &timestamppb.Timestamp{Seconds: int64(created.Second()), Nanos: int32(created.Nanosecond())},
+				UpdatedAt:        &timestamppb.Timestamp{Seconds: int64(created.Second()), Nanos: int32(created.Nanosecond())},
 			},
 		}), user)
 	})
