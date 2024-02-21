@@ -12,12 +12,13 @@ import (
 	"github.com/golerplate/contracts/generated/services/user/store/svc/v1/svcv1connect"
 	"github.com/golerplate/pkg/grpc"
 	sharedmidlewares "github.com/golerplate/pkg/grpc/interceptors"
-	"github.com/golerplate/user-store-svc/internal/handlers"
-	handlers_grpc_user_v1 "github.com/golerplate/user-store-svc/internal/handlers/grpc/user/v1"
-	service "github.com/golerplate/user-store-svc/internal/service/v1"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
+
+	"github.com/golerplate/user-store-svc/internal/handlers"
+	handlers_grpc_user_v1 "github.com/golerplate/user-store-svc/internal/handlers/grpc/user/v1"
+	service "github.com/golerplate/user-store-svc/internal/service/v1"
 )
 
 type health struct{}

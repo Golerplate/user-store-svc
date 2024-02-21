@@ -8,8 +8,9 @@ import (
 	"github.com/golang/protobuf/ptypes/wrappers"
 	userv1 "github.com/golerplate/contracts/generated/services/user/store/svc/v1"
 	"github.com/golerplate/pkg/grpc"
-	entities_user_v1 "github.com/golerplate/user-store-svc/internal/entities/user/v1"
 	"google.golang.org/protobuf/types/known/timestamppb"
+
+	entities_user_v1 "github.com/golerplate/user-store-svc/internal/entities/user/v1"
 )
 
 func (h *handler) CreateUser(ctx context.Context, c *connectgo.Request[userv1.CreateUserRequest]) (*connectgo.Response[userv1.CreateUserResponse], error) {
