@@ -7,7 +7,7 @@ require (
 	github.com/bufbuild/connect-grpcreflect-go v1.1.0
 	github.com/caarlos0/env/v8 v8.0.0
 	github.com/golang/protobuf v1.5.3
-	github.com/golerplate/contracts v0.0.11
+	github.com/golerplate/contracts v0.0.12
 	github.com/golerplate/pkg v0.0.12
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/lib/pq v1.10.9

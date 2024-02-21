@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	cache_mocks "github.com/golerplate/pkg/cache/mocks"
 	"github.com/golerplate/pkg/constants"
 	pkgerrors "github.com/golerplate/pkg/errors"
 	"github.com/stretchr/testify/assert"
@@ -17,12 +18,12 @@ import (
 func Test_CreateUser(t *testing.T) {
 	t.Run("ok - create user", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		m := database_mocks.NewMockDatabase(ctrl)
+		mock_database := database_mocks.NewMockDatabase(ctrl)
 
 		userid := constants.GenerateDataPrefixWithULID(constants.User)
 		created := time.Now()
 
-		m.EXPECT().CreateUser(gomock.Any(), &entities_user_v1.CreateUserRequest{
+		mock_database.EXPECT().CreateUser(gomock.Any(), &entities_user_v1.CreateUserRequest{
 			Username: "testuser",
 			Email:    "testuser@test.com",
 			Password: "123",
@@ -37,7 +38,9 @@ func Test_CreateUser(t *testing.T) {
 			UpdatedAt:        created,
 		}, nil)
 
-		s, err := NewUserStoreService(context.Background(), m)
+		mock_cache := cache_mocks.NewMockCache(ctrl)
+
+		s, err := NewUserStoreService(context.Background(), mock_database, mock_cache)
 		assert.NotNil(t, s)
 		assert.NoError(t, err)
 
@@ -59,15 +62,17 @@ func Test_CreateUser(t *testing.T) {
 	})
 	t.Run("nok - create user", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		m := database_mocks.NewMockDatabase(ctrl)
+		mock_database := database_mocks.NewMockDatabase(ctrl)
 
-		m.EXPECT().CreateUser(gomock.Any(), &entities_user_v1.CreateUserRequest{
+		mock_database.EXPECT().CreateUser(gomock.Any(), &entities_user_v1.CreateUserRequest{
 			Username: "testuser",
 			Email:    "testuser@test.com",
 			Password: "123",
 		}).Return(nil, pkgerrors.NewInternalServerError("error"))
 
-		s, err := NewUserStoreService(context.Background(), m)
+		mock_cache := cache_mocks.NewMockCache(ctrl)
+
+		s, err := NewUserStoreService(context.Background(), mock_database, mock_cache)
 		assert.NotNil(t, s)
 		assert.NoError(t, err)
 
@@ -82,14 +87,14 @@ func Test_CreateUser(t *testing.T) {
 }
 
 func Test_GetUserByEmail(t *testing.T) {
-	t.Run("ok - get user by email", func(t *testing.T) {
+	t.Run("ok - get user by email from cache", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		m := database_mocks.NewMockDatabase(ctrl)
+		mock_database := database_mocks.NewMockDatabase(ctrl)
 
 		userid := constants.GenerateDataPrefixWithULID(constants.User)
 		created := time.Now()
 
-		m.EXPECT().GetUserByEmail(gomock.Any(), "testuser@test.com").Return(&entities_user_v1.User{
+		mock_database.EXPECT().GetUserByEmail(gomock.Any(), "testuser@test.com").Return(&entities_user_v1.User{
 			ID:               userid,
 			Username:         "testuser",
 			Email:            "testuser@test.com",
@@ -100,7 +105,9 @@ func Test_GetUserByEmail(t *testing.T) {
 			UpdatedAt:        created,
 		}, nil)
 
-		s, err := NewUserStoreService(context.Background(), m)
+		mock_cache := cache_mocks.NewMockCache(ctrl)
+
+		s, err := NewUserStoreService(context.Background(), mock_database, mock_cache)
 		assert.NotNil(t, s)
 		assert.NoError(t, err)
 
@@ -121,11 +128,13 @@ func Test_GetUserByEmail(t *testing.T) {
 	})
 	t.Run("not found - get user by email", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		m := database_mocks.NewMockDatabase(ctrl)
+		mock_database := database_mocks.NewMockDatabase(ctrl)
 
-		m.EXPECT().GetUserByEmail(gomock.Any(), "test@test.com").Return(nil, pkgerrors.NewNotFoundError("user with email: test@test.com not found"))
+		mock_database.EXPECT().GetUserByEmail(gomock.Any(), "test@test.com").Return(nil, pkgerrors.NewNotFoundError("user with email: test@test.com not found"))
 
-		s, err := NewUserStoreService(context.Background(), m)
+		mock_cache := cache_mocks.NewMockCache(ctrl)
+
+		s, err := NewUserStoreService(context.Background(), mock_database, mock_cache)
 		assert.NotNil(t, s)
 		assert.NoError(t, err)
 
@@ -135,11 +144,13 @@ func Test_GetUserByEmail(t *testing.T) {
 	})
 	t.Run("nok - get user by email", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		m := database_mocks.NewMockDatabase(ctrl)
+		mock_database := database_mocks.NewMockDatabase(ctrl)
 
-		m.EXPECT().GetUserByEmail(gomock.Any(), "test@test.com").Return(nil, pkgerrors.NewNotFoundError("failed to get user by email: test@test.com"))
+		mock_database.EXPECT().GetUserByEmail(gomock.Any(), "test@test.com").Return(nil, pkgerrors.NewNotFoundError("failed to get user by email: test@test.com"))
 
-		s, err := NewUserStoreService(context.Background(), m)
+		mock_cache := cache_mocks.NewMockCache(ctrl)
+
+		s, err := NewUserStoreService(context.Background(), mock_database, mock_cache)
 		assert.NotNil(t, s)
 		assert.NoError(t, err)
 
@@ -152,12 +163,12 @@ func Test_GetUserByEmail(t *testing.T) {
 func Test_GetUserByID(t *testing.T) {
 	t.Run("ok - get user by id", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		m := database_mocks.NewMockDatabase(ctrl)
+		mock_database := database_mocks.NewMockDatabase(ctrl)
 
 		userid := constants.GenerateDataPrefixWithULID(constants.User)
 		created := time.Now()
 
-		m.EXPECT().GetUserByID(gomock.Any(), userid).Return(&entities_user_v1.User{
+		mock_database.EXPECT().GetUserByID(gomock.Any(), userid).Return(&entities_user_v1.User{
 			ID:               userid,
 			Username:         "testuser",
 			Email:            "testuser@test.com",
@@ -168,7 +179,9 @@ func Test_GetUserByID(t *testing.T) {
 			UpdatedAt:        created,
 		}, nil)
 
-		s, err := NewUserStoreService(context.Background(), m)
+		mock_cache := cache_mocks.NewMockCache(ctrl)
+
+		s, err := NewUserStoreService(context.Background(), mock_database, mock_cache)
 		assert.NotNil(t, s)
 		assert.NoError(t, err)
 
@@ -189,11 +202,13 @@ func Test_GetUserByID(t *testing.T) {
 	})
 	t.Run("not found - get user by id", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		m := database_mocks.NewMockDatabase(ctrl)
+		mock_database := database_mocks.NewMockDatabase(ctrl)
 
-		m.EXPECT().GetUserByID(gomock.Any(), "user_023UN139").Return(nil, pkgerrors.NewNotFoundError("user with id: user_023UN139 not found"))
+		mock_database.EXPECT().GetUserByID(gomock.Any(), "user_023UN139").Return(nil, pkgerrors.NewNotFoundError("user with id: user_023UN139 not found"))
 
-		s, err := NewUserStoreService(context.Background(), m)
+		mock_cache := cache_mocks.NewMockCache(ctrl)
+
+		s, err := NewUserStoreService(context.Background(), mock_database, mock_cache)
 		assert.NotNil(t, s)
 		assert.NoError(t, err)
 
@@ -203,11 +218,13 @@ func Test_GetUserByID(t *testing.T) {
 	})
 	t.Run("nok - get user by id", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		m := database_mocks.NewMockDatabase(ctrl)
+		mock_database := database_mocks.NewMockDatabase(ctrl)
 
-		m.EXPECT().GetUserByID(gomock.Any(), "user_023UN139").Return(nil, pkgerrors.NewNotFoundError("failed to get user by id: user_023UN139"))
+		mock_database.EXPECT().GetUserByID(gomock.Any(), "user_023UN139").Return(nil, pkgerrors.NewNotFoundError("failed to get user by id: user_023UN139"))
 
-		s, err := NewUserStoreService(context.Background(), m)
+		mock_cache := cache_mocks.NewMockCache(ctrl)
+
+		s, err := NewUserStoreService(context.Background(), mock_database, mock_cache)
 		assert.NotNil(t, s)
 		assert.NoError(t, err)
 
@@ -220,12 +237,12 @@ func Test_GetUserByID(t *testing.T) {
 func Test_GetUserByUsername(t *testing.T) {
 	t.Run("ok - get user by username", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		m := database_mocks.NewMockDatabase(ctrl)
+		mock_database := database_mocks.NewMockDatabase(ctrl)
 
 		userid := constants.GenerateDataPrefixWithULID(constants.User)
 		created := time.Now()
 
-		m.EXPECT().GetUserByUsername(gomock.Any(), "testuser").Return(&entities_user_v1.User{
+		mock_database.EXPECT().GetUserByUsername(gomock.Any(), "testuser").Return(&entities_user_v1.User{
 			ID:               userid,
 			Username:         "testuser",
 			Email:            "testuser@test.com",
@@ -236,7 +253,9 @@ func Test_GetUserByUsername(t *testing.T) {
 			UpdatedAt:        created,
 		}, nil)
 
-		s, err := NewUserStoreService(context.Background(), m)
+		mock_cache := cache_mocks.NewMockCache(ctrl)
+
+		s, err := NewUserStoreService(context.Background(), mock_database, mock_cache)
 		assert.NotNil(t, s)
 		assert.NoError(t, err)
 
@@ -257,11 +276,13 @@ func Test_GetUserByUsername(t *testing.T) {
 	})
 	t.Run("not found - get user by username", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		m := database_mocks.NewMockDatabase(ctrl)
+		mock_database := database_mocks.NewMockDatabase(ctrl)
 
-		m.EXPECT().GetUserByUsername(gomock.Any(), "testtesttest").Return(nil, pkgerrors.NewNotFoundError("user with username: testtesttest not found"))
+		mock_database.EXPECT().GetUserByUsername(gomock.Any(), "testtesttest").Return(nil, pkgerrors.NewNotFoundError("user with username: testtesttest not found"))
 
-		s, err := NewUserStoreService(context.Background(), m)
+		mock_cache := cache_mocks.NewMockCache(ctrl)
+
+		s, err := NewUserStoreService(context.Background(), mock_database, mock_cache)
 		assert.NotNil(t, s)
 		assert.NoError(t, err)
 
@@ -271,11 +292,13 @@ func Test_GetUserByUsername(t *testing.T) {
 	})
 	t.Run("nok - get user by username", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		m := database_mocks.NewMockDatabase(ctrl)
+		mock_database := database_mocks.NewMockDatabase(ctrl)
 
-		m.EXPECT().GetUserByUsername(gomock.Any(), "testtesttest").Return(nil, pkgerrors.NewNotFoundError("failed to get user by username: testtesttest"))
+		mock_database.EXPECT().GetUserByUsername(gomock.Any(), "testtesttest").Return(nil, pkgerrors.NewNotFoundError("failed to get user by username: testtesttest"))
 
-		s, err := NewUserStoreService(context.Background(), m)
+		mock_cache := cache_mocks.NewMockCache(ctrl)
+
+		s, err := NewUserStoreService(context.Background(), mock_database, mock_cache)
 		assert.NotNil(t, s)
 		assert.NoError(t, err)
 
@@ -288,13 +311,15 @@ func Test_GetUserByUsername(t *testing.T) {
 func Test_ChangePassword(t *testing.T) {
 	t.Run("ok - change password", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		m := database_mocks.NewMockDatabase(ctrl)
+		mock_database := database_mocks.NewMockDatabase(ctrl)
 
 		userid := constants.GenerateDataPrefixWithULID(constants.User)
 
-		m.EXPECT().ChangePassword(gomock.Any(), userid, "password", "newpassword").Return(nil)
+		mock_database.EXPECT().ChangePassword(gomock.Any(), userid, "password", "newpassword").Return(nil)
 
-		s, err := NewUserStoreService(context.Background(), m)
+		mock_cache := cache_mocks.NewMockCache(ctrl)
+
+		s, err := NewUserStoreService(context.Background(), mock_database, mock_cache)
 		assert.NotNil(t, s)
 		assert.NoError(t, err)
 
@@ -304,11 +329,13 @@ func Test_ChangePassword(t *testing.T) {
 	})
 	t.Run("not found - change password", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		m := database_mocks.NewMockDatabase(ctrl)
+		mock_database := database_mocks.NewMockDatabase(ctrl)
 
-		m.EXPECT().ChangePassword(gomock.Any(), "user_023UN139", "password", "newpassword").Return(pkgerrors.NewInternalServerError("failed to change password"))
+		mock_database.EXPECT().ChangePassword(gomock.Any(), "user_023UN139", "password", "newpassword").Return(pkgerrors.NewInternalServerError("failed to change password"))
 
-		s, err := NewUserStoreService(context.Background(), m)
+		mock_cache := cache_mocks.NewMockCache(ctrl)
+
+		s, err := NewUserStoreService(context.Background(), mock_database, mock_cache)
 		assert.NotNil(t, s)
 		assert.NoError(t, err)
 

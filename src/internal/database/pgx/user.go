@@ -195,6 +195,24 @@ func (d *dbClient) getUserPasswordByID(ctx context.Context, id string) (string, 
 	return userPassword, nil
 }
 
+func (d *dbClient) VerifyPassword(ctx context.Context, userID, password string) (bool, error) {
+	userPassword, err := d.getUserPasswordByID(ctx, userID)
+	if err != nil {
+		return false, err
+	}
+
+	isPasswordValid, err := checkPasswordHash(password, userPassword)
+	if err != nil {
+		return false, err
+	}
+
+	if !isPasswordValid {
+		return false, errors.NewBadRequestError("password is incorrect")
+	}
+
+	return true, nil
+}
+
 func (d *dbClient) ChangePassword(ctx context.Context, userID, oldPassword, newPassword string) error {
 	userPassword, err := d.getUserPasswordByID(ctx, userID)
 	if err != nil {

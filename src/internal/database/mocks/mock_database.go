@@ -113,3 +113,18 @@ func (mr *MockDatabaseMockRecorder) GetUserByUsername(ctx, username any) *gomock
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByUsername", reflect.TypeOf((*MockDatabase)(nil).GetUserByUsername), ctx, username)
 }
+
+// VerifyPassword mocks base method.
+func (m *MockDatabase) VerifyPassword(ctx context.Context, userID, password string) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "VerifyPassword", ctx, userID, password)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// VerifyPassword indicates an expected call of VerifyPassword.
+func (mr *MockDatabaseMockRecorder) VerifyPassword(ctx, userID, password any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VerifyPassword", reflect.TypeOf((*MockDatabase)(nil).VerifyPassword), ctx, userID, password)
+}

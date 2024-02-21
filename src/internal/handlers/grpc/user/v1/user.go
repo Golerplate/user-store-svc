@@ -119,6 +119,24 @@ func (h *handler) GetUserByUsername(ctx context.Context, c *connectgo.Request[us
 	}), nil
 }
 
+func (h *handler) VerifyPassword(ctx context.Context, c *connectgo.Request[userv1.VerifyPasswordRequest]) (*connectgo.Response[userv1.VerifyPasswordResponse], error) {
+	if c.Msg.GetUserId() == nil || c.Msg.GetUserId().GetValue() == "" {
+		return nil, connectgo.NewError(connectgo.CodeInvalidArgument, errors.New("invalid user_id"))
+	}
+	if c.Msg.GetPassword() == nil || c.Msg.GetPassword().GetValue() == "" {
+		return nil, connectgo.NewError(connectgo.CodeInvalidArgument, errors.New("invalid password"))
+	}
+
+	isValid, err := h.userStoreService.VerifyPassword(ctx, c.Msg.GetUserId().GetValue(), c.Msg.GetPassword().GetValue())
+	if err != nil {
+		return nil, grpc.TranslateToGRPCError(ctx, err)
+	}
+
+	return connectgo.NewResponse(&userv1.VerifyPasswordResponse{
+		IsValid: &wrappers.BoolValue{Value: isValid},
+	}), nil
+}
+
 func (h *handler) ChangePassword(ctx context.Context, c *connectgo.Request[userv1.ChangePasswordRequest]) (*connectgo.Response[userv1.ChangePasswordResponse], error) {
 	if c.Msg.GetUserId() == nil || c.Msg.GetUserId().GetValue() == "" {
 		return nil, connectgo.NewError(connectgo.CodeInvalidArgument, errors.New("invalid user_id"))

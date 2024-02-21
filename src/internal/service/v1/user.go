@@ -119,3 +119,12 @@ func (s *service) ChangePassword(ctx context.Context, userID, oldPassword, newPa
 
 	return nil
 }
+
+func (s *service) VerifyPassword(ctx context.Context, userID, password string) (bool, error) {
+	isValid, err := s.store.VerifyPassword(ctx, userID, password)
+	if err != nil {
+		return false, err
+	}
+
+	return isValid, nil
+}
