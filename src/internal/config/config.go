@@ -2,12 +2,14 @@ package config
 
 import (
 	"github.com/caarlos0/env/v8"
+	"github.com/golerplate/pkg/cache/redis"
 	"github.com/golerplate/pkg/grpc"
 )
 
 type Config struct {
 	grpc.GRPCServerConfig
 	DatabaseConfig
+	redis.RedisConfig
 	GeneralConfig
 }
 
