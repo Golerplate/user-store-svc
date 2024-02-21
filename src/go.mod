@@ -8,20 +8,19 @@ require (
 	github.com/caarlos0/env/v8 v8.0.0
 	github.com/golang/protobuf v1.5.3
 	github.com/golerplate/contracts v0.0.11
-	github.com/golerplate/pkg v0.0.9
+	github.com/golerplate/pkg v0.0.11
+	github.com/jmoiron/sqlx v1.3.5
+	github.com/lib/pq v1.10.9
 	github.com/rs/zerolog v1.32.0
 	github.com/stretchr/testify v1.8.4
 	go.uber.org/mock v0.4.0
+	golang.org/x/crypto v0.19.0
 	golang.org/x/net v0.21.0
 	google.golang.org/protobuf v1.32.0
 )
 
-require golang.org/x/crypto v0.19.0
-
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/jmoiron/sqlx v1.3.5
-	github.com/lib/pq v1.10.9
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/oklog/ulid/v2 v2.1.0 // indirect
