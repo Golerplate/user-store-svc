@@ -424,3 +424,113 @@ func Test_GetUserByUsername(t *testing.T) {
 		assert.Equal(t, connectgo.CodeInvalidArgument, connectgo.CodeOf(err))
 	})
 }
+
+func Test_ChangePassword(t *testing.T) {
+	t.Run("ok - change password", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		m := database_mocks.NewMockDatabase(ctrl)
+
+		m.EXPECT().ChangePassword(gomock.Any(), "user_123ABC", "oldpassword", "newpassword").Return(nil)
+
+		h, err := NewUserStoreServiceHandler(context.Background(), m)
+		assert.NotNil(t, h)
+		assert.NoError(t, err)
+
+		req := &connectgo.Request[userv1.ChangePasswordRequest]{
+			Msg: &userv1.ChangePasswordRequest{
+				UserId:      &wrapperspb.StringValue{Value: "user_123ABC"},
+				OldPassword: &wrapperspb.StringValue{Value: "oldpassword"},
+				NewPassword: &wrapperspb.StringValue{Value: "newpassword"},
+			},
+		}
+
+		user, err := h.ChangePassword(context.Background(), req)
+		assert.NotNil(t, user)
+		assert.NoError(t, err)
+	})
+	t.Run("nok - change password", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		m := database_mocks.NewMockDatabase(ctrl)
+
+		m.EXPECT().ChangePassword(gomock.Any(), "user_123ABC", "oldpassword", "newpassword").Return(pkgerrors.NewInternalServerError("error"))
+
+		h, err := NewUserStoreServiceHandler(context.Background(), m)
+		assert.NotNil(t, h)
+		assert.NoError(t, err)
+
+		req := &connectgo.Request[userv1.ChangePasswordRequest]{
+			Msg: &userv1.ChangePasswordRequest{
+				UserId:      &wrapperspb.StringValue{Value: "user_123ABC"},
+				OldPassword: &wrapperspb.StringValue{Value: "oldpassword"},
+				NewPassword: &wrapperspb.StringValue{Value: "newpassword"},
+			},
+		}
+
+		user, err := h.ChangePassword(context.Background(), req)
+		assert.Nil(t, user)
+		assert.Error(t, err)
+	})
+	t.Run("nok - change password without user_id", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		m := database_mocks.NewMockDatabase(ctrl)
+
+		h, err := NewUserStoreServiceHandler(context.Background(), m)
+		assert.NotNil(t, h)
+		assert.NoError(t, err)
+
+		req := &connectgo.Request[userv1.ChangePasswordRequest]{
+			Msg: &userv1.ChangePasswordRequest{
+				UserId:      &wrapperspb.StringValue{Value: ""},
+				OldPassword: &wrapperspb.StringValue{Value: "oldpassword"},
+				NewPassword: &wrapperspb.StringValue{Value: "newpassword"},
+			},
+		}
+
+		user, err := h.ChangePassword(context.Background(), req)
+		assert.Nil(t, user)
+		assert.Error(t, err)
+		assert.Equal(t, connectgo.CodeInvalidArgument, connectgo.CodeOf(err))
+	})
+	t.Run("nok - change password without old_password", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		m := database_mocks.NewMockDatabase(ctrl)
+
+		h, err := NewUserStoreServiceHandler(context.Background(), m)
+		assert.NotNil(t, h)
+		assert.NoError(t, err)
+
+		req := &connectgo.Request[userv1.ChangePasswordRequest]{
+			Msg: &userv1.ChangePasswordRequest{
+				UserId:      &wrapperspb.StringValue{Value: "user_123ABC"},
+				OldPassword: &wrapperspb.StringValue{Value: ""},
+				NewPassword: &wrapperspb.StringValue{Value: "newpassword"},
+			},
+		}
+
+		user, err := h.ChangePassword(context.Background(), req)
+		assert.Nil(t, user)
+		assert.Error(t, err)
+		assert.Equal(t, connectgo.CodeInvalidArgument, connectgo.CodeOf(err))
+	})
+	t.Run("nok - change password without new_password", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		m := database_mocks.NewMockDatabase(ctrl)
+
+		h, err := NewUserStoreServiceHandler(context.Background(), m)
+		assert.NotNil(t, h)
+		assert.NoError(t, err)
+
+		req := &connectgo.Request[userv1.ChangePasswordRequest]{
+			Msg: &userv1.ChangePasswordRequest{
+				UserId:      &wrapperspb.StringValue{Value: "user_123ABC"},
+				OldPassword: &wrapperspb.StringValue{Value: "oldpassword"},
+				NewPassword: &wrapperspb.StringValue{Value: ""},
+			},
+		}
+
+		user, err := h.ChangePassword(context.Background(), req)
+		assert.Nil(t, user)
+		assert.Error(t, err)
+		assert.Equal(t, connectgo.CodeInvalidArgument, connectgo.CodeOf(err))
+	})
+}
