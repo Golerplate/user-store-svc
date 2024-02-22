@@ -534,3 +534,89 @@ func Test_ChangePassword(t *testing.T) {
 		assert.Equal(t, connectgo.CodeInvalidArgument, connectgo.CodeOf(err))
 	})
 }
+
+func Test_VerifyPassword(t *testing.T) {
+	t.Run("ok - verify password", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		m := database_mocks.NewMockDatabase(ctrl)
+
+		m.EXPECT().VerifyPassword(gomock.Any(), "user_123ABC", "password").Return(true, nil)
+
+		h, err := NewUserStoreServiceHandler(context.Background(), m)
+		assert.NotNil(t, h)
+		assert.NoError(t, err)
+
+		req := &connectgo.Request[userv1.VerifyPasswordRequest]{
+			Msg: &userv1.VerifyPasswordRequest{
+				UserId:   &wrapperspb.StringValue{Value: "user_123ABC"},
+				Password: &wrapperspb.StringValue{Value: "password"},
+			},
+		}
+
+		isValid, err := h.VerifyPassword(context.Background(), req)
+		assert.NotNil(t, isValid)
+		assert.NoError(t, err)
+		assert.True(t, isValid.Msg.IsValid.Value)
+	})
+	t.Run("nok - verify password", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		m := database_mocks.NewMockDatabase(ctrl)
+
+		m.EXPECT().VerifyPassword(gomock.Any(), "user_123ABC", "password").Return(false, pkgerrors.NewInternalServerError("error"))
+
+		h, err := NewUserStoreServiceHandler(context.Background(), m)
+		assert.NotNil(t, h)
+		assert.NoError(t, err)
+
+		req := &connectgo.Request[userv1.VerifyPasswordRequest]{
+			Msg: &userv1.VerifyPasswordRequest{
+				UserId:   &wrapperspb.StringValue{Value: "user_123ABC"},
+				Password: &wrapperspb.StringValue{Value: "password"},
+			},
+		}
+
+		isValid, err := h.VerifyPassword(context.Background(), req)
+		assert.Nil(t, isValid)
+		assert.Error(t, err)
+	})
+	t.Run("nok - verify password without user_id", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		m := database_mocks.NewMockDatabase(ctrl)
+
+		h, err := NewUserStoreServiceHandler(context.Background(), m)
+		assert.NotNil(t, h)
+		assert.NoError(t, err)
+
+		req := &connectgo.Request[userv1.VerifyPasswordRequest]{
+			Msg: &userv1.VerifyPasswordRequest{
+				UserId:   &wrapperspb.StringValue{Value: ""},
+				Password: &wrapperspb.StringValue{Value: "password"},
+			},
+		}
+
+		isValid, err := h.VerifyPassword(context.Background(), req)
+		assert.Nil(t, isValid)
+		assert.Error(t, err)
+		assert.Equal(t, connectgo.CodeInvalidArgument, connectgo.CodeOf(err))
+	})
+	t.Run("nok - verify password without password", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		m := database_mocks.NewMockDatabase(ctrl)
+
+		h, err := NewUserStoreServiceHandler(context.Background(), m)
+		assert.NotNil(t, h)
+		assert.NoError(t, err)
+
+		req := &connectgo.Request[userv1.VerifyPasswordRequest]{
+			Msg: &userv1.VerifyPasswordRequest{
+				UserId:   &wrapperspb.StringValue{Value: "user_123ABC"},
+				Password: &wrapperspb.StringValue{Value: ""},
+			},
+		}
+
+		user, err := h.VerifyPassword(context.Background(), req)
+		assert.Nil(t, user)
+		assert.Error(t, err)
+		assert.Equal(t, connectgo.CodeInvalidArgument, connectgo.CodeOf(err))
+	})
+}
