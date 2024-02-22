@@ -19,9 +19,7 @@ override DB_NAME = user-store-db
 endif
 
 run:
-	docker-compose up -d
-	cd src/internal/database/migrations && goose postgres "host=$(DB_HOST) port=$(DB_PORT) user=$(DB_USER) password=$(DB_PASSWORD) dbname=$(DB_NAME) sslmode=disable" up && cd ../../../../
-	cd src && air -c .air.toml
+	cd src && docker-compose up
 
 update:
 	cd src && go mod tidy

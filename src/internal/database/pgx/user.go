@@ -31,7 +31,7 @@ func (d *dbClient) CreateUser(ctx context.Context, req *entities_user_v1.CreateU
 			) 
 			VALUES ($1, $2, $3, $4, $5, $6);
 		`,
-		userID, req.ExternalID, req.Email, username, now, now)
+		userID, req.ExternalID, username, req.Email, now, now)
 	if err != nil {
 		return nil, errors.NewInternalServerError(fmt.Sprintf("failed to create user: %v", err.Error()))
 	}

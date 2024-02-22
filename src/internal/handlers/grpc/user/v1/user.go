@@ -8,6 +8,7 @@ import (
 	"github.com/golang/protobuf/ptypes/wrappers"
 	userv1 "github.com/golerplate/contracts/generated/services/user/store/svc/v1"
 	"github.com/golerplate/pkg/grpc"
+	"github.com/rs/zerolog/log"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	entities_user_v1 "github.com/golerplate/user-store-svc/internal/entities/user/v1"
@@ -20,6 +21,8 @@ func (h *handler) CreateUser(ctx context.Context, c *connectgo.Request[userv1.Cr
 	if c.Msg.GetEmail() == nil || c.Msg.GetEmail().GetValue() == "" {
 		return nil, connectgo.NewError(connectgo.CodeInvalidArgument, errors.New("invalid email"))
 	}
+
+	log.Info().Msg("CreateUser")
 
 	user, err := h.userStoreService.CreateUser(ctx, &entities_user_v1.CreateUserRequest{
 		ExternalID: c.Msg.GetExternalId().GetValue(),
