@@ -25,6 +25,10 @@ func generateUserCacheKeyWithUsername(username string) string {
 	return fmt.Sprintf("user-store-svc:user:username:%v", username)
 }
 
+func generateUserCacheKeyWithExternalID(externalID string) string {
+	return fmt.Sprintf("user-store-svc:user:external_id:%v", externalID)
+}
+
 type service struct {
 	store database.Database
 	cache cache.Cache

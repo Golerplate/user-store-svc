@@ -6,10 +6,11 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/golerplate/pkg/cache/redis"
+	pkg_config "github.com/golerplate/pkg/config"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
-	"github.com/golerplate/pkg/cache/redis"
 	"github.com/golerplate/user-store-svc/internal/config"
 	database_pgx "github.com/golerplate/user-store-svc/internal/database/pgx"
 	handlers_grpc "github.com/golerplate/user-store-svc/internal/handlers/grpc"
@@ -21,9 +22,11 @@ func main() {
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGTERM)
 
-	cfg, err := config.GetServiceConfig()
+	cfg := &config.Config{}
+	err := pkg_config.ParseConfig(cfg)
 	if err != nil {
-		panic(err)
+		log.Fatal().Err(err).
+			Msg("main: unable to parse config")
 	}
 
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)

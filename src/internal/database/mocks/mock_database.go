@@ -40,20 +40,6 @@ func (m *MockDatabase) EXPECT() *MockDatabaseMockRecorder {
 	return m.recorder
 }
 
-// ChangePassword mocks base method.
-func (m *MockDatabase) ChangePassword(ctx context.Context, userID, oldPassword, newPassword string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ChangePassword", ctx, userID, oldPassword, newPassword)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// ChangePassword indicates an expected call of ChangePassword.
-func (mr *MockDatabaseMockRecorder) ChangePassword(ctx, userID, oldPassword, newPassword any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ChangePassword", reflect.TypeOf((*MockDatabase)(nil).ChangePassword), ctx, userID, oldPassword, newPassword)
-}
-
 // CreateUser mocks base method.
 func (m *MockDatabase) CreateUser(ctx context.Context, req *entities_user_v1.CreateUserRequest) (*entities_user_v1.User, error) {
 	m.ctrl.T.Helper()
@@ -112,19 +98,4 @@ func (m *MockDatabase) GetUserByUsername(ctx context.Context, username string) (
 func (mr *MockDatabaseMockRecorder) GetUserByUsername(ctx, username any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByUsername", reflect.TypeOf((*MockDatabase)(nil).GetUserByUsername), ctx, username)
-}
-
-// VerifyPassword mocks base method.
-func (m *MockDatabase) VerifyPassword(ctx context.Context, userID, password string) (bool, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "VerifyPassword", ctx, userID, password)
-	ret0, _ := ret[0].(bool)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// VerifyPassword indicates an expected call of VerifyPassword.
-func (mr *MockDatabaseMockRecorder) VerifyPassword(ctx, userID, password any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VerifyPassword", reflect.TypeOf((*MockDatabase)(nil).VerifyPassword), ctx, userID, password)
 }

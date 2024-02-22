@@ -12,7 +12,5 @@ type Database interface {
 	GetUserByEmail(ctx context.Context, email string) (*entities_user_v1.User, error)
 	GetUserByID(ctx context.Context, id string) (*entities_user_v1.User, error)
 	GetUserByUsername(ctx context.Context, username string) (*entities_user_v1.User, error)
-
-	VerifyPassword(ctx context.Context, userID, password string) (bool, error)
-	ChangePassword(ctx context.Context, userID, oldPassword, newPassword string) error
+	GetUserByExternalID(ctx context.Context, externalID string) (*entities_user_v1.User, error)
 }

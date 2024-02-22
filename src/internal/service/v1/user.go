@@ -111,20 +111,33 @@ func (s *service) GetUserByUsername(ctx context.Context, username string) (*enti
 	return user, nil
 }
 
-func (s *service) ChangePassword(ctx context.Context, userID, oldPassword, newPassword string) error {
-	err := s.store.ChangePassword(ctx, userID, oldPassword, newPassword)
-	if err != nil {
-		return err
+func (s *service) GetUserByExternalID(ctx context.Context, externalID string) (*entities_user_v1.User, error) {
+	cachedUser, err := s.cache.Get(ctx, externalID)
+	if err == nil {
+		var user *entities_user_v1.User
+		err = json.Unmarshal([]byte(cachedUser), &user)
+		if err != nil {
+			log.Error().Err(err).
+				Str("user_id", externalID).
+				Msg("service.v1.service.GetUserByExternalID: unable to unmarshall user")
+		} else {
+			return user, nil
+		}
 	}
 
-	return nil
-}
-
-func (s *service) VerifyPassword(ctx context.Context, userID, password string) (bool, error) {
-	isValid, err := s.store.VerifyPassword(ctx, userID, password)
+	user, err := s.store.GetUserByExternalID(ctx, externalID)
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 
-	return isValid, nil
+	bytes, err := json.Marshal(user)
+	if err != nil {
+		log.Error().Err(err).
+			Str("user_id", externalID).
+			Msg("service.v1.service.GetUserByExternalID: unable to marshal user")
+	} else {
+		_ = s.cache.SetEx(ctx, generateUserCacheKeyWithExternalID(externalID), bytes, userCacheDuration)
+	}
+
+	return user, nil
 }

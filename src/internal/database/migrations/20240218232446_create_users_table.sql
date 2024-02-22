@@ -2,14 +2,11 @@
 -- +goose StatementBegin
 CREATE TABLE users (
     id           VARCHAR(40) PRIMARY KEY NOT NULL,
+    external_id  VARCHAR(40) NOT NULL,
     username    VARCHAR(255) NOT NULL,
     email       VARCHAR(255) NOT NULL,
-    password    VARCHAR(255) NOT NULL,
-    is_verified BOOLEAN DEFAULT FALSE,
-    profile_picture VARCHAR(255),
     created_at   TIMESTAMP(6) NOT NULL,
-    updated_at TIMESTAMP(6) ,
-    deleted_at   TIMESTAMP(6)
+    updated_at TIMESTAMP(6)
 );
 
 CREATE UNIQUE INDEX uidx_users_username ON users (username);
