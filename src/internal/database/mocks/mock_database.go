@@ -70,6 +70,21 @@ func (mr *MockDatabaseMockRecorder) GetUserByEmail(ctx, email any) *gomock.Call 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByEmail", reflect.TypeOf((*MockDatabase)(nil).GetUserByEmail), ctx, email)
 }
 
+// GetUserByExternalID mocks base method.
+func (m *MockDatabase) GetUserByExternalID(ctx context.Context, externalID string) (*entities_user_v1.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserByExternalID", ctx, externalID)
+	ret0, _ := ret[0].(*entities_user_v1.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserByExternalID indicates an expected call of GetUserByExternalID.
+func (mr *MockDatabaseMockRecorder) GetUserByExternalID(ctx, externalID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByExternalID", reflect.TypeOf((*MockDatabase)(nil).GetUserByExternalID), ctx, externalID)
+}
+
 // GetUserByID mocks base method.
 func (m *MockDatabase) GetUserByID(ctx context.Context, id string) (*entities_user_v1.User, error) {
 	m.ctrl.T.Helper()
@@ -98,4 +113,19 @@ func (m *MockDatabase) GetUserByUsername(ctx context.Context, username string) (
 func (mr *MockDatabaseMockRecorder) GetUserByUsername(ctx, username any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByUsername", reflect.TypeOf((*MockDatabase)(nil).GetUserByUsername), ctx, username)
+}
+
+// UpdateUsername mocks base method.
+func (m *MockDatabase) UpdateUsername(ctx context.Context, userID, username string) (*entities_user_v1.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateUsername", ctx, userID, username)
+	ret0, _ := ret[0].(*entities_user_v1.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateUsername indicates an expected call of UpdateUsername.
+func (mr *MockDatabaseMockRecorder) UpdateUsername(ctx, userID, username any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUsername", reflect.TypeOf((*MockDatabase)(nil).UpdateUsername), ctx, userID, username)
 }

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/brianvoe/gofakeit/v7"
+	"github.com/brianvoe/gofakeit/v6"
 	"github.com/golerplate/pkg/constants"
 	"github.com/golerplate/pkg/errors"
 
@@ -181,6 +181,40 @@ func (d *dbClient) GetUserByExternalID(ctx context.Context, externalID string) (
 		}
 
 		return nil, errors.NewInternalServerError(fmt.Sprintf("failed to get user by external_id: %v", err.Error()))
+	}
+
+	return user, nil
+}
+
+func (d *dbClient) UpdateUsername(ctx context.Context, userID, username string) (*entities_user_v1.User, error) {
+	user := &entities_user_v1.User{}
+
+	err := d.connection.DB.QueryRowContext(ctx,
+		`UPDATE
+			users
+		SET
+			username = $1,
+			updated_at = $2
+		WHERE
+			id = $3
+		RETURNING
+			id,
+			external_id,
+			username,
+			email,
+			created_at,
+			updated_at;
+		`,
+		username, time.Now(), userID).Scan(
+		&user.ID,
+		&user.ExternalID,
+		&user.Username,
+		&user.Email,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+	)
+	if err != nil {
+		return nil, errors.NewInternalServerError(fmt.Sprintf("failed to update user: %v", err.Error()))
 	}
 
 	return user, nil

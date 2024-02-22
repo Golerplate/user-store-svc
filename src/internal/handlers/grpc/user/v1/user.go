@@ -130,5 +130,27 @@ func (h *handler) GetUserByExternalID(ctx context.Context, c *connectgo.Request[
 }
 
 func (h *handler) UpdateUsername(ctx context.Context, c *connectgo.Request[userv1.UpdateUsernameRequest]) (*connectgo.Response[userv1.UpdateUsernameResponse], error) {
-	return nil, nil
+	if c.Msg.GetId() == nil || c.Msg.GetId().GetValue() == "" {
+		return nil, connectgo.NewError(connectgo.CodeInvalidArgument, errors.New("invalid id"))
+	}
+
+	if c.Msg.GetUsername() == nil || c.Msg.GetUsername().GetValue() == "" {
+		return nil, connectgo.NewError(connectgo.CodeInvalidArgument, errors.New("invalid username"))
+	}
+
+	user, err := h.userStoreService.UpdateUsername(ctx, c.Msg.GetId().GetValue(), c.Msg.GetUsername().GetValue())
+	if err != nil {
+		return nil, grpc.TranslateToGRPCError(ctx, err)
+	}
+
+	return connectgo.NewResponse(&userv1.UpdateUsernameResponse{
+		User: &userv1.User{
+			Id:         &wrappers.StringValue{Value: user.ID},
+			ExternalId: &wrappers.StringValue{Value: user.ExternalID},
+			Username:   &wrappers.StringValue{Value: user.Username},
+			Email:      &wrappers.StringValue{Value: user.Email},
+			CreatedAt:  &timestamppb.Timestamp{Seconds: int64(user.CreatedAt.Second()), Nanos: int32(user.CreatedAt.Nanosecond())},
+			UpdatedAt:  &timestamppb.Timestamp{Seconds: int64(user.UpdatedAt.Second()), Nanos: int32(user.UpdatedAt.Nanosecond())},
+		},
+	}), nil
 }

@@ -9,6 +9,42 @@ import (
 	entities_user_v1 "github.com/golerplate/user-store-svc/internal/entities/user/v1"
 )
 
+func (s *service) clearCacheForUser(ctx context.Context, user *entities_user_v1.User) error {
+	err := s.cache.Del(ctx, user.ID)
+	if err != nil {
+		log.Error().Err(err).
+			Str("user_id", user.ID).
+			Msg("service.v1.service.clearCacheForUser: unable to delete user from cache by user_id")
+		return err
+	}
+
+	err = s.cache.Del(ctx, user.Username)
+	if err != nil {
+		log.Error().Err(err).
+			Str("username", user.Username).
+			Msg("service.v1.service.clearCacheForUser: unable to delete user from cache by username")
+		return err
+	}
+
+	err = s.cache.Del(ctx, user.ExternalID)
+	if err != nil {
+		log.Error().Err(err).
+			Str("external_id", user.ExternalID).
+			Msg("service.v1.service.clearCacheForUser: unable to delete user from cache by external_id")
+		return err
+	}
+
+	err = s.cache.Del(ctx, user.Email)
+	if err != nil {
+		log.Error().Err(err).
+			Str("email", user.Email).
+			Msg("service.v1.service.clearCacheForUser: unable to delete user from cache by email")
+		return err
+	}
+
+	return nil
+}
+
 func (s *service) CreateUser(ctx context.Context, req *entities_user_v1.CreateUserRequest) (*entities_user_v1.User, error) {
 	user, err := s.store.CreateUser(ctx, req)
 	if err != nil {
@@ -137,6 +173,20 @@ func (s *service) GetUserByExternalID(ctx context.Context, externalID string) (*
 			Msg("service.v1.service.GetUserByExternalID: unable to marshal user")
 	} else {
 		_ = s.cache.SetEx(ctx, generateUserCacheKeyWithExternalID(externalID), bytes, userCacheDuration)
+	}
+
+	return user, nil
+}
+
+func (s *service) UpdateUsername(ctx context.Context, userID, username string) (*entities_user_v1.User, error) {
+	user, err := s.store.UpdateUsername(ctx, userID, username)
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.clearCacheForUser(ctx, user)
+	if err != nil {
+		return nil, err
 	}
 
 	return user, nil

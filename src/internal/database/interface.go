@@ -13,4 +13,6 @@ type Database interface {
 	GetUserByID(ctx context.Context, id string) (*entities_user_v1.User, error)
 	GetUserByUsername(ctx context.Context, username string) (*entities_user_v1.User, error)
 	GetUserByExternalID(ctx context.Context, externalID string) (*entities_user_v1.User, error)
+
+	UpdateUsername(ctx context.Context, userID, username string) (*entities_user_v1.User, error)
 }
