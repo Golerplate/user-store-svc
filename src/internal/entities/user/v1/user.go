@@ -11,7 +11,13 @@ type User struct {
 	UpdatedAt  time.Time `json:"updated_at"`
 }
 
-type CreateUserRequest struct {
+type ServiceCreateUserRequest struct {
+	ExternalID string `json:"external_id"`
+	Email      string `json:"email"`
+	Username   string `json:"username"`
+}
+
+type GRPCCreateUserRequest struct {
 	ExternalID string `json:"external_id"`
 	Email      string `json:"email"`
 }

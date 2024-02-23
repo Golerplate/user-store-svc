@@ -25,13 +25,16 @@ func Test_CreateUser(t *testing.T) {
 		userid := constants.GenerateDataPrefixWithULID(constants.User)
 		created := time.Now()
 
-		mock_database.EXPECT().CreateUser(gomock.Any(), &entities_user_v1.CreateUserRequest{
-			ExternalID: "testuser",
-			Email:      "testuser@test.com",
-		}).Return(&entities_user_v1.User{
+		mock_database.EXPECT().CreateUser(gomock.Any(), gomock.Any()).Do(
+			func(ctx context.Context, req *entities_user_v1.ServiceCreateUserRequest) {
+				assert.Equal(t, "testuser", req.ExternalID)
+				assert.Equal(t, "testuser@test.com", req.Email)
+				assert.NotEmpty(t, req.Username)
+			},
+		).Return(&entities_user_v1.User{
 			ID:         userid,
 			ExternalID: "testuser",
-			Username:   "username",
+			Username:   gomock.Any().String(),
 			Email:      "testuser@test.com",
 			CreatedAt:  created,
 			UpdatedAt:  created,
@@ -43,30 +46,31 @@ func Test_CreateUser(t *testing.T) {
 		assert.NotNil(t, s)
 		assert.NoError(t, err)
 
-		user, err := s.CreateUser(context.Background(), &entities_user_v1.CreateUserRequest{
+		user, err := s.CreateUser(context.Background(), &entities_user_v1.GRPCCreateUserRequest{
 			ExternalID: "testuser",
 			Email:      "testuser@test.com",
 		})
 		assert.NotNil(t, user)
 		assert.NoError(t, err)
 
-		assert.EqualValues(t, &entities_user_v1.User{
-			ID:         userid,
-			ExternalID: "testuser",
-			Username:   "username",
-			Email:      "testuser@test.com",
-			CreatedAt:  created,
-			UpdatedAt:  created,
-		}, user)
+		assert.Equal(t, userid, user.ID)
+		assert.Equal(t, "testuser", user.ExternalID)
+		assert.Equal(t, gomock.Any().String(), user.Username)
+		assert.Equal(t, "testuser@test.com", user.Email)
+		assert.True(t, user.CreatedAt.Equal(created))
+		assert.True(t, user.UpdatedAt.Equal(created))
 	})
 	t.Run("nok - create user", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		mock_database := database_mocks.NewMockDatabase(ctrl)
 
-		mock_database.EXPECT().CreateUser(gomock.Any(), &entities_user_v1.CreateUserRequest{
-			ExternalID: "testuser",
-			Email:      "testuser@test.com",
-		}).Return(nil, pkgerrors.NewInternalServerError("error"))
+		mock_database.EXPECT().CreateUser(gomock.Any(), gomock.Any()).Do(
+			func(ctx context.Context, req *entities_user_v1.ServiceCreateUserRequest) {
+				assert.Equal(t, "testuser", req.ExternalID)
+				assert.Equal(t, "testuser@test.com", req.Email)
+				assert.NotEmpty(t, req.Username)
+			},
+		).Return(nil, pkgerrors.NewInternalServerError("error"))
 
 		mock_cache := cache_mocks.NewMockCache(ctrl)
 
@@ -74,7 +78,7 @@ func Test_CreateUser(t *testing.T) {
 		assert.NotNil(t, s)
 		assert.NoError(t, err)
 
-		user, err := s.CreateUser(context.Background(), &entities_user_v1.CreateUserRequest{
+		user, err := s.CreateUser(context.Background(), &entities_user_v1.GRPCCreateUserRequest{
 			ExternalID: "testuser",
 			Email:      "testuser@test.com",
 		})

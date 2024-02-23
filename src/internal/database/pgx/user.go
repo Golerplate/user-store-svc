@@ -6,18 +6,15 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/brianvoe/gofakeit/v6"
 	"github.com/golerplate/pkg/constants"
 	"github.com/golerplate/pkg/errors"
 
 	entities_user_v1 "github.com/golerplate/user-store-svc/internal/entities/user/v1"
 )
 
-func (d *dbClient) CreateUser(ctx context.Context, req *entities_user_v1.CreateUserRequest) (*entities_user_v1.User, error) {
+func (d *dbClient) CreateUser(ctx context.Context, req *entities_user_v1.ServiceCreateUserRequest) (*entities_user_v1.User, error) {
 	userID := constants.GenerateDataPrefixWithULID(constants.User)
 	now := time.Now()
-
-	username := gofakeit.Username()
 
 	_, err := d.connection.DB.ExecContext(ctx,
 		`INSERT INTO 
@@ -31,7 +28,7 @@ func (d *dbClient) CreateUser(ctx context.Context, req *entities_user_v1.CreateU
 			) 
 			VALUES ($1, $2, $3, $4, $5, $6);
 		`,
-		userID, req.ExternalID, username, req.Email, now, now)
+		userID, req.ExternalID, req.Username, req.Email, now, now)
 	if err != nil {
 		return nil, errors.NewInternalServerError(fmt.Sprintf("failed to create user: %v", err.Error()))
 	}
@@ -39,7 +36,7 @@ func (d *dbClient) CreateUser(ctx context.Context, req *entities_user_v1.CreateU
 	return &entities_user_v1.User{
 		ID:         userID,
 		ExternalID: req.ExternalID,
-		Username:   username,
+		Username:   req.Username,
 		Email:      req.Email,
 		CreatedAt:  now,
 		UpdatedAt:  now,
@@ -214,6 +211,10 @@ func (d *dbClient) UpdateUsername(ctx context.Context, userID, username string) 
 		&user.UpdatedAt,
 	)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, errors.NewNotFoundError(fmt.Sprintf("user: %s not found", userID))
+		}
+
 		return nil, errors.NewInternalServerError(fmt.Sprintf("failed to update user: %v", err.Error()))
 	}
 

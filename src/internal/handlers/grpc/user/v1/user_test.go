@@ -2,12 +2,14 @@ package handlers_grpc_user_v1
 
 import (
 	"context"
+	"encoding/json"
 	"testing"
 	"time"
 
 	connectgo "github.com/bufbuild/connect-go"
 	"github.com/golang/protobuf/ptypes/wrappers"
 	userv1 "github.com/golerplate/contracts/generated/services/user/store/svc/v1"
+	cache_mocks "github.com/golerplate/pkg/cache/mocks"
 	"github.com/golerplate/pkg/constants"
 	pkgerrors "github.com/golerplate/pkg/errors"
 	"github.com/stretchr/testify/assert"
@@ -17,6 +19,7 @@ import (
 
 	database_mocks "github.com/golerplate/user-store-svc/internal/database/mocks"
 	entities_user_v1 "github.com/golerplate/user-store-svc/internal/entities/user/v1"
+	service_v1 "github.com/golerplate/user-store-svc/internal/service/v1"
 )
 
 func Test_CreateUser(t *testing.T) {
@@ -27,19 +30,28 @@ func Test_CreateUser(t *testing.T) {
 		userid := constants.GenerateDataPrefixWithULID(constants.User)
 		created := time.Now()
 
-		m.EXPECT().CreateUser(gomock.Any(), &entities_user_v1.CreateUserRequest{
-			ExternalID: "testuser",
-			Email:      "testuser@test.com",
-		}).Return(&entities_user_v1.User{
+		m.EXPECT().CreateUser(gomock.Any(), gomock.Any()).Do(
+			func(ctx context.Context, req *entities_user_v1.ServiceCreateUserRequest) {
+				assert.Equal(t, "testuser", req.ExternalID)
+				assert.Equal(t, "testuser@test.com", req.Email)
+				assert.NotEmpty(t, req.Username)
+			},
+		).Return(&entities_user_v1.User{
 			ID:         userid,
 			ExternalID: "testuser",
-			Username:   "username",
+			Username:   gomock.Any().String(),
 			Email:      "testuser@test.com",
 			CreatedAt:  created,
 			UpdatedAt:  created,
 		}, nil)
 
-		h, err := NewUserStoreServiceHandler(context.Background(), m)
+		mock_cache := cache_mocks.NewMockCache(ctrl)
+
+		service, err := service_v1.NewUserStoreService(context.Background(), m, mock_cache)
+		assert.NotNil(t, service)
+		assert.NoError(t, err)
+
+		h, err := NewUserStoreServiceHandler(context.Background(), service)
 		assert.NotNil(t, h)
 		assert.NoError(t, err)
 
@@ -58,7 +70,7 @@ func Test_CreateUser(t *testing.T) {
 			User: &userv1.User{
 				Id:         &wrappers.StringValue{Value: userid},
 				ExternalId: &wrappers.StringValue{Value: "testuser"},
-				Username:   &wrappers.StringValue{Value: "username"},
+				Username:   &wrappers.StringValue{Value: gomock.Any().String()},
 				Email:      &wrappers.StringValue{Value: "testuser@test.com"},
 				CreatedAt:  &timestamppb.Timestamp{Seconds: int64(created.Second()), Nanos: int32(created.Nanosecond())},
 				UpdatedAt:  &timestamppb.Timestamp{Seconds: int64(created.Second()), Nanos: int32(created.Nanosecond())},
@@ -69,12 +81,21 @@ func Test_CreateUser(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		m := database_mocks.NewMockDatabase(ctrl)
 
-		m.EXPECT().CreateUser(gomock.Any(), &entities_user_v1.CreateUserRequest{
-			ExternalID: "testuser",
-			Email:      "testuser@test.com",
-		}).Return(nil, pkgerrors.NewInternalServerError("error"))
+		m.EXPECT().CreateUser(gomock.Any(), gomock.Any()).Do(
+			func(ctx context.Context, req *entities_user_v1.ServiceCreateUserRequest) {
+				assert.Equal(t, "testuser", req.ExternalID)
+				assert.Equal(t, "testuser@test.com", req.Email)
+				assert.NotEmpty(t, req.Username)
+			},
+		).Return(nil, pkgerrors.NewInternalServerError("error"))
 
-		h, err := NewUserStoreServiceHandler(context.Background(), m)
+		mock_cache := cache_mocks.NewMockCache(ctrl)
+
+		service, err := service_v1.NewUserStoreService(context.Background(), m, mock_cache)
+		assert.NotNil(t, service)
+		assert.NoError(t, err)
+
+		h, err := NewUserStoreServiceHandler(context.Background(), service)
 		assert.NotNil(t, h)
 		assert.NoError(t, err)
 
@@ -93,7 +114,13 @@ func Test_CreateUser(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		m := database_mocks.NewMockDatabase(ctrl)
 
-		h, err := NewUserStoreServiceHandler(context.Background(), m)
+		mock_cache := cache_mocks.NewMockCache(ctrl)
+
+		service, err := service_v1.NewUserStoreService(context.Background(), m, mock_cache)
+		assert.NotNil(t, service)
+		assert.NoError(t, err)
+
+		h, err := NewUserStoreServiceHandler(context.Background(), service)
 		assert.NotNil(t, h)
 		assert.NoError(t, err)
 
@@ -113,7 +140,13 @@ func Test_CreateUser(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		m := database_mocks.NewMockDatabase(ctrl)
 
-		h, err := NewUserStoreServiceHandler(context.Background(), m)
+		mock_cache := cache_mocks.NewMockCache(ctrl)
+
+		service, err := service_v1.NewUserStoreService(context.Background(), m, mock_cache)
+		assert.NotNil(t, service)
+		assert.NoError(t, err)
+
+		h, err := NewUserStoreServiceHandler(context.Background(), service)
 		assert.NotNil(t, h)
 		assert.NoError(t, err)
 
@@ -139,16 +172,26 @@ func Test_GetUserByEmail(t *testing.T) {
 		userid := constants.GenerateDataPrefixWithULID(constants.User)
 		created := time.Now()
 
-		m.EXPECT().GetUserByEmail(gomock.Any(), "testuser@test.com").Return(&entities_user_v1.User{
+		mock_cache := cache_mocks.NewMockCache(ctrl)
+
+		userCached := &entities_user_v1.User{
 			ID:         userid,
 			ExternalID: "testuser",
 			Username:   "username",
 			Email:      "testuser@test.com",
 			CreatedAt:  created,
 			UpdatedAt:  created,
-		}, nil)
+		}
 
-		h, err := NewUserStoreServiceHandler(context.Background(), m)
+		userCachedBytes, _ := json.Marshal(userCached)
+
+		mock_cache.EXPECT().Get(gomock.Any(), "testuser@test.com").Return(string(userCachedBytes), nil)
+
+		service, err := service_v1.NewUserStoreService(context.Background(), m, mock_cache)
+		assert.NotNil(t, service)
+		assert.NoError(t, err)
+
+		h, err := NewUserStoreServiceHandler(context.Background(), service)
 		assert.NotNil(t, h)
 		assert.NoError(t, err)
 
@@ -179,7 +222,17 @@ func Test_GetUserByEmail(t *testing.T) {
 
 		m.EXPECT().GetUserByEmail(gomock.Any(), "testuser@test.com").Return(nil, pkgerrors.NewInternalServerError("error"))
 
-		h, err := NewUserStoreServiceHandler(context.Background(), m)
+		mock_cache := cache_mocks.NewMockCache(ctrl)
+
+		fakeData := `abczd{>`
+
+		mock_cache.EXPECT().Get(gomock.Any(), "testuser@test.com").Return(fakeData, nil)
+
+		service, err := service_v1.NewUserStoreService(context.Background(), m, mock_cache)
+		assert.NotNil(t, service)
+		assert.NoError(t, err)
+
+		h, err := NewUserStoreServiceHandler(context.Background(), service)
 		assert.NotNil(t, h)
 		assert.NoError(t, err)
 
@@ -197,7 +250,13 @@ func Test_GetUserByEmail(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		m := database_mocks.NewMockDatabase(ctrl)
 
-		h, err := NewUserStoreServiceHandler(context.Background(), m)
+		mock_cache := cache_mocks.NewMockCache(ctrl)
+
+		service, err := service_v1.NewUserStoreService(context.Background(), m, mock_cache)
+		assert.NotNil(t, service)
+		assert.NoError(t, err)
+
+		h, err := NewUserStoreServiceHandler(context.Background(), service)
 		assert.NotNil(t, h)
 		assert.NoError(t, err)
 
@@ -222,16 +281,26 @@ func Test_GetUserByID(t *testing.T) {
 		userid := constants.GenerateDataPrefixWithULID(constants.User)
 		created := time.Now()
 
-		m.EXPECT().GetUserByID(gomock.Any(), userid).Return(&entities_user_v1.User{
+		mock_cache := cache_mocks.NewMockCache(ctrl)
+
+		userCached := &entities_user_v1.User{
 			ID:         userid,
 			ExternalID: "testuser",
 			Username:   "username",
 			Email:      "testuser@test.com",
 			CreatedAt:  created,
 			UpdatedAt:  created,
-		}, nil)
+		}
 
-		h, err := NewUserStoreServiceHandler(context.Background(), m)
+		userCachedBytes, _ := json.Marshal(userCached)
+
+		mock_cache.EXPECT().Get(gomock.Any(), userid).Return(string(userCachedBytes), nil)
+
+		service, err := service_v1.NewUserStoreService(context.Background(), m, mock_cache)
+		assert.NotNil(t, service)
+		assert.NoError(t, err)
+
+		h, err := NewUserStoreServiceHandler(context.Background(), service)
 		assert.NotNil(t, h)
 		assert.NoError(t, err)
 
@@ -264,7 +333,17 @@ func Test_GetUserByID(t *testing.T) {
 
 		m.EXPECT().GetUserByID(gomock.Any(), userid).Return(nil, pkgerrors.NewInternalServerError("error"))
 
-		h, err := NewUserStoreServiceHandler(context.Background(), m)
+		mock_cache := cache_mocks.NewMockCache(ctrl)
+
+		fakeData := `abczd{>`
+
+		mock_cache.EXPECT().Get(gomock.Any(), userid).Return(fakeData, nil)
+
+		service, err := service_v1.NewUserStoreService(context.Background(), m, mock_cache)
+		assert.NotNil(t, service)
+		assert.NoError(t, err)
+
+		h, err := NewUserStoreServiceHandler(context.Background(), service)
 		assert.NotNil(t, h)
 		assert.NoError(t, err)
 
@@ -282,7 +361,13 @@ func Test_GetUserByID(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		m := database_mocks.NewMockDatabase(ctrl)
 
-		h, err := NewUserStoreServiceHandler(context.Background(), m)
+		mock_cache := cache_mocks.NewMockCache(ctrl)
+
+		service, err := service_v1.NewUserStoreService(context.Background(), m, mock_cache)
+		assert.NotNil(t, service)
+		assert.NoError(t, err)
+
+		h, err := NewUserStoreServiceHandler(context.Background(), service)
 		assert.NotNil(t, h)
 		assert.NoError(t, err)
 
@@ -307,16 +392,26 @@ func Test_GetUserByUsername(t *testing.T) {
 		userid := constants.GenerateDataPrefixWithULID(constants.User)
 		created := time.Now()
 
-		m.EXPECT().GetUserByUsername(gomock.Any(), "username").Return(&entities_user_v1.User{
+		mock_cache := cache_mocks.NewMockCache(ctrl)
+
+		userCached := &entities_user_v1.User{
 			ID:         userid,
 			ExternalID: "testuser",
 			Username:   "username",
 			Email:      "testuser@test.com",
 			CreatedAt:  created,
 			UpdatedAt:  created,
-		}, nil)
+		}
 
-		h, err := NewUserStoreServiceHandler(context.Background(), m)
+		userCachedBytes, _ := json.Marshal(userCached)
+
+		mock_cache.EXPECT().Get(gomock.Any(), "username").Return(string(userCachedBytes), nil)
+
+		service, err := service_v1.NewUserStoreService(context.Background(), m, mock_cache)
+		assert.NotNil(t, service)
+		assert.NoError(t, err)
+
+		h, err := NewUserStoreServiceHandler(context.Background(), service)
 		assert.NotNil(t, h)
 		assert.NoError(t, err)
 
@@ -347,7 +442,17 @@ func Test_GetUserByUsername(t *testing.T) {
 
 		m.EXPECT().GetUserByUsername(gomock.Any(), "username").Return(nil, pkgerrors.NewInternalServerError("error"))
 
-		h, err := NewUserStoreServiceHandler(context.Background(), m)
+		mock_cache := cache_mocks.NewMockCache(ctrl)
+
+		fakeData := `abczd{>`
+
+		mock_cache.EXPECT().Get(gomock.Any(), "username").Return(fakeData, nil)
+
+		service, err := service_v1.NewUserStoreService(context.Background(), m, mock_cache)
+		assert.NotNil(t, service)
+		assert.NoError(t, err)
+
+		h, err := NewUserStoreServiceHandler(context.Background(), service)
 		assert.NotNil(t, h)
 		assert.NoError(t, err)
 
@@ -365,7 +470,13 @@ func Test_GetUserByUsername(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		m := database_mocks.NewMockDatabase(ctrl)
 
-		h, err := NewUserStoreServiceHandler(context.Background(), m)
+		mock_cache := cache_mocks.NewMockCache(ctrl)
+
+		service, err := service_v1.NewUserStoreService(context.Background(), m, mock_cache)
+		assert.NotNil(t, service)
+		assert.NoError(t, err)
+
+		h, err := NewUserStoreServiceHandler(context.Background(), service)
 		assert.NotNil(t, h)
 		assert.NoError(t, err)
 
@@ -390,16 +501,26 @@ func Test_GetUserByExternalID(t *testing.T) {
 		userid := constants.GenerateDataPrefixWithULID(constants.User)
 		created := time.Now()
 
-		m.EXPECT().GetUserByExternalID(gomock.Any(), "testuser").Return(&entities_user_v1.User{
+		mock_cache := cache_mocks.NewMockCache(ctrl)
+
+		userCached := &entities_user_v1.User{
 			ID:         userid,
 			ExternalID: "testuser",
 			Username:   "username",
 			Email:      "testuser@test.com",
 			CreatedAt:  created,
 			UpdatedAt:  created,
-		}, nil)
+		}
 
-		h, err := NewUserStoreServiceHandler(context.Background(), m)
+		userCachedBytes, _ := json.Marshal(userCached)
+
+		mock_cache.EXPECT().Get(gomock.Any(), "testuser").Return(string(userCachedBytes), nil)
+
+		service, err := service_v1.NewUserStoreService(context.Background(), m, mock_cache)
+		assert.NotNil(t, service)
+		assert.NoError(t, err)
+
+		h, err := NewUserStoreServiceHandler(context.Background(), service)
 		assert.NotNil(t, h)
 		assert.NoError(t, err)
 
@@ -430,7 +551,17 @@ func Test_GetUserByExternalID(t *testing.T) {
 
 		m.EXPECT().GetUserByExternalID(gomock.Any(), "testuser").Return(nil, pkgerrors.NewInternalServerError("error"))
 
-		h, err := NewUserStoreServiceHandler(context.Background(), m)
+		mock_cache := cache_mocks.NewMockCache(ctrl)
+
+		fakeData := `abczd{>`
+
+		mock_cache.EXPECT().Get(gomock.Any(), "testuser").Return(fakeData, nil)
+
+		service, err := service_v1.NewUserStoreService(context.Background(), m, mock_cache)
+		assert.NotNil(t, service)
+		assert.NoError(t, err)
+
+		h, err := NewUserStoreServiceHandler(context.Background(), service)
 		assert.NotNil(t, h)
 		assert.NoError(t, err)
 
@@ -448,7 +579,13 @@ func Test_GetUserByExternalID(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		m := database_mocks.NewMockDatabase(ctrl)
 
-		h, err := NewUserStoreServiceHandler(context.Background(), m)
+		mock_cache := cache_mocks.NewMockCache(ctrl)
+
+		service, err := service_v1.NewUserStoreService(context.Background(), m, mock_cache)
+		assert.NotNil(t, service)
+		assert.NoError(t, err)
+
+		h, err := NewUserStoreServiceHandler(context.Background(), service)
 		assert.NotNil(t, h)
 		assert.NoError(t, err)
 
@@ -473,16 +610,27 @@ func Test_UpdateUsername(t *testing.T) {
 		userid := constants.GenerateDataPrefixWithULID(constants.User)
 		created := time.Now()
 
+		mock_cache := cache_mocks.NewMockCache(ctrl)
+
 		m.EXPECT().UpdateUsername(gomock.Any(), userid, "username").Return(&entities_user_v1.User{
 			ID:         userid,
 			ExternalID: "testuser",
-			Username:   "username",
+			Username:   gomock.Any().String(),
 			Email:      "testuser@test.com",
 			CreatedAt:  created,
 			UpdatedAt:  created,
 		}, nil)
 
-		h, err := NewUserStoreServiceHandler(context.Background(), m)
+		mock_cache.EXPECT().Del(gomock.Any(), gomock.Any()).Return(nil)
+		mock_cache.EXPECT().Del(gomock.Any(), gomock.Any()).Return(nil)
+		mock_cache.EXPECT().Del(gomock.Any(), gomock.Any()).Return(nil)
+		mock_cache.EXPECT().Del(gomock.Any(), gomock.Any()).Return(nil)
+
+		service, err := service_v1.NewUserStoreService(context.Background(), m, mock_cache)
+		assert.NotNil(t, service)
+		assert.NoError(t, err)
+
+		h, err := NewUserStoreServiceHandler(context.Background(), service)
 		assert.NotNil(t, h)
 		assert.NoError(t, err)
 
@@ -501,7 +649,7 @@ func Test_UpdateUsername(t *testing.T) {
 			User: &userv1.User{
 				Id:         &wrappers.StringValue{Value: userid},
 				ExternalId: &wrappers.StringValue{Value: "testuser"},
-				Username:   &wrappers.StringValue{Value: "username"},
+				Username:   &wrappers.StringValue{Value: gomock.Any().String()},
 				Email:      &wrappers.StringValue{Value: "testuser@test.com"},
 				CreatedAt:  &timestamppb.Timestamp{Seconds: int64(created.Second()), Nanos: int32(created.Nanosecond())},
 				UpdatedAt:  &timestamppb.Timestamp{Seconds: int64(created.Second()), Nanos: int32(created.Nanosecond())},
@@ -512,9 +660,15 @@ func Test_UpdateUsername(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		m := database_mocks.NewMockDatabase(ctrl)
 
+		mock_cache := cache_mocks.NewMockCache(ctrl)
+
 		m.EXPECT().UpdateUsername(gomock.Any(), "user_id", "username").Return(nil, pkgerrors.NewInternalServerError("error"))
 
-		h, err := NewUserStoreServiceHandler(context.Background(), m)
+		service, err := service_v1.NewUserStoreService(context.Background(), m, mock_cache)
+		assert.NotNil(t, service)
+		assert.NoError(t, err)
+
+		h, err := NewUserStoreServiceHandler(context.Background(), service)
 		assert.NotNil(t, h)
 		assert.NoError(t, err)
 
@@ -533,7 +687,13 @@ func Test_UpdateUsername(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		m := database_mocks.NewMockDatabase(ctrl)
 
-		h, err := NewUserStoreServiceHandler(context.Background(), m)
+		mock_cache := cache_mocks.NewMockCache(ctrl)
+
+		service, err := service_v1.NewUserStoreService(context.Background(), m, mock_cache)
+		assert.NotNil(t, service)
+		assert.NoError(t, err)
+
+		h, err := NewUserStoreServiceHandler(context.Background(), service)
 		assert.NotNil(t, h)
 		assert.NoError(t, err)
 
@@ -552,7 +712,13 @@ func Test_UpdateUsername(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		m := database_mocks.NewMockDatabase(ctrl)
 
-		h, err := NewUserStoreServiceHandler(context.Background(), m)
+		mock_cache := cache_mocks.NewMockCache(ctrl)
+
+		service, err := service_v1.NewUserStoreService(context.Background(), m, mock_cache)
+		assert.NotNil(t, service)
+		assert.NoError(t, err)
+
+		h, err := NewUserStoreServiceHandler(context.Background(), service)
 		assert.NotNil(t, h)
 		assert.NoError(t, err)
 

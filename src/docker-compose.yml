@@ -1,22 +1,22 @@
 version: "3"
 
 services:
-  app:
+  user-store-svc-app:
       command: reflex -sr '\.go$|\.mod$' -- sh -c "go run cmd/main.go"
       build:
         dockerfile: Dockerfile.local
         context: .
       depends_on:
-        - db
-        - redis
+        - user-store-svc-db
+        - user-store-svc-redis
       environment:
         - DB_USER=root
         - DB_PASSWORD=root
         - DB_NAME=user-store-db
-        - DB_HOST=db
+        - DB_HOST=user-store-svc-db
         - DB_PORT=5432
         - GRPC_SERVER_PORT=50051
-        - CACHE_HOST=redis
+        - CACHE_HOST=user-store-svc-redis
         - CACHE_PORT=6379
         - SERVICE_NAME=user-store-svc
         - ENVRIONMENT=local
@@ -25,11 +25,11 @@ services:
       working_dir: /go/src/app
       ports:
         - "50051:50051"
-  redis:
+  user-store-svc-redis:
     image: redis:latest
     ports:
       - "6379:6379"
-  db:
+  user-store-svc-db:
     image: postgres:latest
     environment:
       POSTGRES_USER: 'root'

@@ -24,7 +24,7 @@ func (h *handler) CreateUser(ctx context.Context, c *connectgo.Request[userv1.Cr
 
 	log.Info().Msg("CreateUser")
 
-	user, err := h.userStoreService.CreateUser(ctx, &entities_user_v1.CreateUserRequest{
+	user, err := h.userStoreService.CreateUser(ctx, &entities_user_v1.GRPCCreateUserRequest{
 		ExternalID: c.Msg.GetExternalId().GetValue(),
 		Email:      c.Msg.GetEmail().GetValue(),
 	})

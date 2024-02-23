@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
+	"github.com/brianvoe/gofakeit/v6"
 	"github.com/rs/zerolog/log"
 
 	entities_user_v1 "github.com/golerplate/user-store-svc/internal/entities/user/v1"
@@ -45,8 +46,12 @@ func (s *service) clearCacheForUser(ctx context.Context, user *entities_user_v1.
 	return nil
 }
 
-func (s *service) CreateUser(ctx context.Context, req *entities_user_v1.CreateUserRequest) (*entities_user_v1.User, error) {
-	user, err := s.store.CreateUser(ctx, req)
+func (s *service) CreateUser(ctx context.Context, req *entities_user_v1.GRPCCreateUserRequest) (*entities_user_v1.User, error) {
+	user, err := s.store.CreateUser(ctx, &entities_user_v1.ServiceCreateUserRequest{
+		ExternalID: req.ExternalID,
+		Email:      req.Email,
+		Username:   gofakeit.Username(),
+	})
 	if err != nil {
 		return nil, err
 	}
