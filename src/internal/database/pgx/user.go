@@ -51,13 +51,13 @@ func (d *dbClient) GetUserByEmail(ctx context.Context, email string) (*entities_
 			id,
 			external_id,
 			username,
-			email, 
-			created_at, 
+			email,
+			created_at,
 			updated_at
 		FROM
 			users
 		WHERE
-			email = $1;
+			email = ?
 		`,
 		email).Scan(
 		&user.ID,
@@ -127,7 +127,7 @@ func (d *dbClient) GetUserByUsername(ctx context.Context, username string) (*ent
 		FROM
 			users
 		WHERE
-			username = $1;
+			username = ?;
 		`,
 		username).Scan(
 		&user.ID,

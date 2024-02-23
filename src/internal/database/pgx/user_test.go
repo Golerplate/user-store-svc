@@ -91,9 +91,9 @@ func Test_GetUserByEmail(t *testing.T) {
 		userID := constants.GenerateDataPrefixWithULID(constants.User)
 
 		rows := sqlmock.NewRows([]string{"id", "external_id", "username", "email", "created_at", "updated_at"}).
-			AddRow(userID, "testuser", "username", "testuser@test.com", time.Now().String(), time.Now().String())
+			AddRow(userID, "testuser", "username", "testuser@test.com", time.Now(), time.Now())
 
-		mock.ExpectQuery("SELECT id, external_id, username, email, created_at, updated_at FROM users WHERE email = $1;").WithArgs("testuser@test.com").WillReturnError(nil).WillReturnRows(rows)
+		mock.ExpectQuery("SELECT id, external_id, username, email, created_at, updated_at FROM users WHERE email = ?").WithArgs("testuser@test.com").WillReturnError(nil).WillReturnRows(rows)
 
 		user, err := sqlxDB.GetUserByEmail(context.Background(), "testuser@test.com")
 		assert.NotNil(t, user)
@@ -101,7 +101,7 @@ func Test_GetUserByEmail(t *testing.T) {
 
 		// assert.True(t, constants.User.IsValid(user.ID))
 		// assert.Equal(t, "testuser", user.ExternalID)
-		// assert.Equal(t, "username", user.Username)
+		// assert.Equal(t, "username", user.Username)3
 		// assert.Equal(t, "testuser@test.com", user.Email)
 		// assert.False(t, user.CreatedAt.IsZero())
 		// assert.False(t, user.UpdatedAt.IsZero())
