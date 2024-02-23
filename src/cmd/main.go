@@ -8,6 +8,7 @@ import (
 
 	"github.com/golerplate/pkg/cache/redis"
 	pkg_config "github.com/golerplate/pkg/config"
+	database_postgres "github.com/golerplate/pkg/database/postgres"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
@@ -34,9 +35,14 @@ func main() {
 	cacheConnection := redis.GetConnection(ctx, cfg.RedisConfig)
 	cacheRedis := redis.NewRedisCache(ctx, cacheConnection)
 
-	databaseConnection := database_pgx.NewDatabaseConnection(ctx, cfg)
+	databaseConnection, err := database_postgres.NewDatabaseConnection(ctx, &cfg.DatabaseConfig)
+	if err != nil {
+		log.Fatal().Err(err).
+			Msg("main: unable to create database connection")
+	}
+	databaseClient := database_pgx.NewClient(ctx, databaseConnection)
 
-	userStoreService, err := service.NewUserStoreService(ctx, databaseConnection, cacheRedis)
+	userStoreService, err := service.NewUserStoreService(ctx, databaseClient, cacheRedis)
 	if err != nil {
 		log.Fatal().Err(err).
 			Msg("main: unable to create user store service")
