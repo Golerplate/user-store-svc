@@ -41,7 +41,7 @@ func (m *MockDatabase) EXPECT() *MockDatabaseMockRecorder {
 }
 
 // CreateUser mocks base method.
-func (m *MockDatabase) CreateUser(ctx context.Context, req *entities_user_v1.ServiceCreateUserRequest) (*entities_user_v1.User, error) {
+func (m *MockDatabase) CreateUser(ctx context.Context, req *entities_user_v1.CreateUserRequest) (*entities_user_v1.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateUser", ctx, req)
 	ret0, _ := ret[0].(*entities_user_v1.User)

@@ -25,19 +25,15 @@ func Test_CreateUser(t *testing.T) {
 		userid := constants.GenerateDataPrefixWithULID(constants.User)
 		created := time.Now()
 
-		mock_database.EXPECT().CreateUser(gomock.Any(), gomock.Any()).Do(
-			func(ctx context.Context, req *entities_user_v1.ServiceCreateUserRequest) {
-				assert.Equal(t, "testuser", req.ExternalID)
-				assert.Equal(t, "testuser@test.com", req.Email)
-				assert.NotEmpty(t, req.Username)
-			},
-		).Return(&entities_user_v1.User{
-			ID:         userid,
-			ExternalID: "testuser",
-			Username:   gomock.Any().String(),
-			Email:      "testuser@test.com",
-			CreatedAt:  created,
-			UpdatedAt:  created,
+		mock_database.EXPECT().CreateUser(gomock.Any(), &entities_user_v1.CreateUserRequest{
+			Username: "Teyz",
+			Email:    "testuser@test.com",
+		}).Return(&entities_user_v1.User{
+			ID:        userid,
+			Username:  "Teyz",
+			Email:     "testuser@test.com",
+			CreatedAt: created,
+			UpdatedAt: created,
 		}, nil)
 
 		mock_cache := cache_mocks.NewMockCache(ctrl)
@@ -46,16 +42,15 @@ func Test_CreateUser(t *testing.T) {
 		assert.NotNil(t, s)
 		assert.NoError(t, err)
 
-		user, err := s.CreateUser(context.Background(), &entities_user_v1.GRPCCreateUserRequest{
-			ExternalID: "testuser",
-			Email:      "testuser@test.com",
+		user, err := s.CreateUser(context.Background(), &entities_user_v1.CreateUserRequest{
+			Username: "Teyz",
+			Email:    "testuser@test.com",
 		})
 		assert.NotNil(t, user)
 		assert.NoError(t, err)
 
 		assert.Equal(t, userid, user.ID)
-		assert.Equal(t, "testuser", user.ExternalID)
-		assert.Equal(t, gomock.Any().String(), user.Username)
+		assert.Equal(t, "Teyz", user.Username)
 		assert.Equal(t, "testuser@test.com", user.Email)
 		assert.True(t, user.CreatedAt.Equal(created))
 		assert.True(t, user.UpdatedAt.Equal(created))
@@ -64,13 +59,10 @@ func Test_CreateUser(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		mock_database := database_mocks.NewMockDatabase(ctrl)
 
-		mock_database.EXPECT().CreateUser(gomock.Any(), gomock.Any()).Do(
-			func(ctx context.Context, req *entities_user_v1.ServiceCreateUserRequest) {
-				assert.Equal(t, "testuser", req.ExternalID)
-				assert.Equal(t, "testuser@test.com", req.Email)
-				assert.NotEmpty(t, req.Username)
-			},
-		).Return(nil, pkgerrors.NewInternalServerError("error"))
+		mock_database.EXPECT().CreateUser(gomock.Any(), &entities_user_v1.CreateUserRequest{
+			Username: "Teyz",
+			Email:    "testuser@test.com",
+		}).Return(nil, pkgerrors.NewInternalServerError("error"))
 
 		mock_cache := cache_mocks.NewMockCache(ctrl)
 
@@ -78,9 +70,9 @@ func Test_CreateUser(t *testing.T) {
 		assert.NotNil(t, s)
 		assert.NoError(t, err)
 
-		user, err := s.CreateUser(context.Background(), &entities_user_v1.GRPCCreateUserRequest{
-			ExternalID: "testuser",
-			Email:      "testuser@test.com",
+		user, err := s.CreateUser(context.Background(), &entities_user_v1.CreateUserRequest{
+			Username: "Teyz",
+			Email:    "testuser@test.com",
 		})
 		assert.Nil(t, user)
 		assert.Error(t, err)
@@ -98,12 +90,11 @@ func Test_GetUserByEmail(t *testing.T) {
 		mock_cache := cache_mocks.NewMockCache(ctrl)
 
 		userCached := &entities_user_v1.User{
-			ID:         userid,
-			ExternalID: "testuser",
-			Username:   "username",
-			Email:      "testuser@test.com",
-			CreatedAt:  created,
-			UpdatedAt:  created,
+			ID:        userid,
+			Username:  "username",
+			Email:     "testuser@test.com",
+			CreatedAt: created,
+			UpdatedAt: created,
 		}
 
 		userCachedBytes, _ := json.Marshal(userCached)
@@ -119,7 +110,6 @@ func Test_GetUserByEmail(t *testing.T) {
 		assert.NoError(t, err)
 
 		assert.Equal(t, userid, user.ID)
-		assert.Equal(t, "testuser", user.ExternalID)
 		assert.Equal(t, "username", user.Username)
 		assert.Equal(t, "testuser@test.com", user.Email)
 		assert.True(t, user.CreatedAt.Equal(created))
@@ -133,12 +123,11 @@ func Test_GetUserByEmail(t *testing.T) {
 		created := time.Now()
 
 		mock_database.EXPECT().GetUserByEmail(gomock.Any(), "testuser@test.com").Return(&entities_user_v1.User{
-			ID:         userid,
-			ExternalID: "testuser",
-			Username:   "username",
-			Email:      "testuser@test.com",
-			CreatedAt:  created,
-			UpdatedAt:  created,
+			ID:        userid,
+			Username:  "username",
+			Email:     "testuser@test.com",
+			CreatedAt: created,
+			UpdatedAt: created,
 		}, nil)
 
 		mock_cache := cache_mocks.NewMockCache(ctrl)
@@ -146,12 +135,11 @@ func Test_GetUserByEmail(t *testing.T) {
 		mock_cache.EXPECT().Get(gomock.Any(), "testuser@test.com").Return("", pkgerrors.NewNotFoundError("error"))
 
 		userCached := &entities_user_v1.User{
-			ID:         userid,
-			ExternalID: "testuser",
-			Username:   "username",
-			Email:      "testuser@test.com",
-			CreatedAt:  created,
-			UpdatedAt:  created,
+			ID:        userid,
+			Username:  "username",
+			Email:     "testuser@test.com",
+			CreatedAt: created,
+			UpdatedAt: created,
 		}
 
 		userCachedBytes, _ := json.Marshal(userCached)
@@ -167,7 +155,6 @@ func Test_GetUserByEmail(t *testing.T) {
 		assert.NoError(t, err)
 
 		assert.Equal(t, userid, user.ID)
-		assert.Equal(t, "testuser", user.ExternalID)
 		assert.Equal(t, "username", user.Username)
 		assert.Equal(t, "testuser@test.com", user.Email)
 		assert.True(t, user.CreatedAt.Equal(created))
@@ -205,21 +192,19 @@ func Test_GetUserByEmail(t *testing.T) {
 		created := time.Now()
 
 		mock_database.EXPECT().GetUserByEmail(gomock.Any(), "testuser@test.com").Return(&entities_user_v1.User{
-			ID:         userid,
-			ExternalID: "testuser",
-			Username:   "username",
-			Email:      "testuser@test.com",
-			CreatedAt:  created,
-			UpdatedAt:  created,
+			ID:        userid,
+			Username:  "username",
+			Email:     "testuser@test.com",
+			CreatedAt: created,
+			UpdatedAt: created,
 		}, nil)
 
 		userCached := &entities_user_v1.User{
-			ID:         userid,
-			ExternalID: "testuser",
-			Username:   "username",
-			Email:      "testuser@test.com",
-			CreatedAt:  created,
-			UpdatedAt:  created,
+			ID:        userid,
+			Username:  "username",
+			Email:     "testuser@test.com",
+			CreatedAt: created,
+			UpdatedAt: created,
 		}
 
 		userCachedBytes, _ := json.Marshal(userCached)
@@ -235,7 +220,6 @@ func Test_GetUserByEmail(t *testing.T) {
 		assert.NoError(t, err)
 
 		assert.Equal(t, userid, user.ID)
-		assert.Equal(t, "testuser", user.ExternalID)
 		assert.Equal(t, "username", user.Username)
 		assert.Equal(t, "testuser@test.com", user.Email)
 		assert.True(t, user.CreatedAt.Equal(created))
@@ -254,12 +238,11 @@ func Test_GetUserByUsename(t *testing.T) {
 		mock_cache := cache_mocks.NewMockCache(ctrl)
 
 		userCached := &entities_user_v1.User{
-			ID:         userid,
-			ExternalID: "testuser",
-			Username:   "username",
-			Email:      "testuser@test.com",
-			CreatedAt:  created,
-			UpdatedAt:  created,
+			ID:        userid,
+			Username:  "username",
+			Email:     "testuser@test.com",
+			CreatedAt: created,
+			UpdatedAt: created,
 		}
 
 		userCachedBytes, _ := json.Marshal(userCached)
@@ -275,7 +258,6 @@ func Test_GetUserByUsename(t *testing.T) {
 		assert.NoError(t, err)
 
 		assert.Equal(t, userid, user.ID)
-		assert.Equal(t, "testuser", user.ExternalID)
 		assert.Equal(t, "username", user.Username)
 		assert.Equal(t, "testuser@test.com", user.Email)
 		assert.True(t, user.CreatedAt.Equal(created))
@@ -289,12 +271,11 @@ func Test_GetUserByUsename(t *testing.T) {
 		created := time.Now()
 
 		mock_database.EXPECT().GetUserByUsername(gomock.Any(), "username").Return(&entities_user_v1.User{
-			ID:         userid,
-			ExternalID: "testuser",
-			Username:   "username",
-			Email:      "testuser@test.com",
-			CreatedAt:  created,
-			UpdatedAt:  created,
+			ID:        userid,
+			Username:  "username",
+			Email:     "testuser@test.com",
+			CreatedAt: created,
+			UpdatedAt: created,
 		}, nil)
 
 		mock_cache := cache_mocks.NewMockCache(ctrl)
@@ -302,12 +283,11 @@ func Test_GetUserByUsename(t *testing.T) {
 		mock_cache.EXPECT().Get(gomock.Any(), "username").Return("", pkgerrors.NewNotFoundError("error"))
 
 		userCached := &entities_user_v1.User{
-			ID:         userid,
-			ExternalID: "testuser",
-			Username:   "username",
-			Email:      "testuser@test.com",
-			CreatedAt:  created,
-			UpdatedAt:  created,
+			ID:        userid,
+			Username:  "username",
+			Email:     "testuser@test.com",
+			CreatedAt: created,
+			UpdatedAt: created,
 		}
 
 		userCachedBytes, _ := json.Marshal(userCached)
@@ -323,7 +303,6 @@ func Test_GetUserByUsename(t *testing.T) {
 		assert.NoError(t, err)
 
 		assert.Equal(t, userid, user.ID)
-		assert.Equal(t, "testuser", user.ExternalID)
 		assert.Equal(t, "username", user.Username)
 		assert.Equal(t, "testuser@test.com", user.Email)
 		assert.True(t, user.CreatedAt.Equal(created))
@@ -361,21 +340,19 @@ func Test_GetUserByUsename(t *testing.T) {
 		created := time.Now()
 
 		mock_database.EXPECT().GetUserByUsername(gomock.Any(), "username").Return(&entities_user_v1.User{
-			ID:         userid,
-			ExternalID: "testuser",
-			Username:   "username",
-			Email:      "testuser@test.com",
-			CreatedAt:  created,
-			UpdatedAt:  created,
+			ID:        userid,
+			Username:  "username",
+			Email:     "testuser@test.com",
+			CreatedAt: created,
+			UpdatedAt: created,
 		}, nil)
 
 		userCached := &entities_user_v1.User{
-			ID:         userid,
-			ExternalID: "testuser",
-			Username:   "username",
-			Email:      "testuser@test.com",
-			CreatedAt:  created,
-			UpdatedAt:  created,
+			ID:        userid,
+			Username:  "username",
+			Email:     "testuser@test.com",
+			CreatedAt: created,
+			UpdatedAt: created,
 		}
 
 		userCachedBytes, _ := json.Marshal(userCached)
@@ -391,7 +368,6 @@ func Test_GetUserByUsename(t *testing.T) {
 		assert.NoError(t, err)
 
 		assert.Equal(t, userid, user.ID)
-		assert.Equal(t, "testuser", user.ExternalID)
 		assert.Equal(t, "username", user.Username)
 		assert.Equal(t, "testuser@test.com", user.Email)
 		assert.True(t, user.CreatedAt.Equal(created))
@@ -410,12 +386,11 @@ func Test_GetUserByID(t *testing.T) {
 		mock_cache := cache_mocks.NewMockCache(ctrl)
 
 		userCached := &entities_user_v1.User{
-			ID:         userid,
-			ExternalID: "testuser",
-			Username:   "username",
-			Email:      "testuser@test.com",
-			CreatedAt:  created,
-			UpdatedAt:  created,
+			ID:        userid,
+			Username:  "username",
+			Email:     "testuser@test.com",
+			CreatedAt: created,
+			UpdatedAt: created,
 		}
 
 		userCachedBytes, _ := json.Marshal(userCached)
@@ -431,7 +406,6 @@ func Test_GetUserByID(t *testing.T) {
 		assert.NoError(t, err)
 
 		assert.Equal(t, userid, user.ID)
-		assert.Equal(t, "testuser", user.ExternalID)
 		assert.Equal(t, "username", user.Username)
 		assert.Equal(t, "testuser@test.com", user.Email)
 		assert.True(t, user.CreatedAt.Equal(created))
@@ -445,12 +419,11 @@ func Test_GetUserByID(t *testing.T) {
 		created := time.Now()
 
 		mock_database.EXPECT().GetUserByID(gomock.Any(), userid).Return(&entities_user_v1.User{
-			ID:         userid,
-			ExternalID: "testuser",
-			Username:   "username",
-			Email:      "testuser@test.com",
-			CreatedAt:  created,
-			UpdatedAt:  created,
+			ID:        userid,
+			Username:  "username",
+			Email:     "testuser@test.com",
+			CreatedAt: created,
+			UpdatedAt: created,
 		}, nil)
 
 		mock_cache := cache_mocks.NewMockCache(ctrl)
@@ -458,12 +431,11 @@ func Test_GetUserByID(t *testing.T) {
 		mock_cache.EXPECT().Get(gomock.Any(), userid).Return("", pkgerrors.NewNotFoundError("error"))
 
 		userCached := &entities_user_v1.User{
-			ID:         userid,
-			ExternalID: "testuser",
-			Username:   "username",
-			Email:      "testuser@test.com",
-			CreatedAt:  created,
-			UpdatedAt:  created,
+			ID:        userid,
+			Username:  "username",
+			Email:     "testuser@test.com",
+			CreatedAt: created,
+			UpdatedAt: created,
 		}
 
 		userCachedBytes, _ := json.Marshal(userCached)
@@ -479,7 +451,6 @@ func Test_GetUserByID(t *testing.T) {
 		assert.NoError(t, err)
 
 		assert.Equal(t, userid, user.ID)
-		assert.Equal(t, "testuser", user.ExternalID)
 		assert.Equal(t, "username", user.Username)
 		assert.Equal(t, "testuser@test.com", user.Email)
 		assert.True(t, user.CreatedAt.Equal(created))
@@ -519,21 +490,19 @@ func Test_GetUserByID(t *testing.T) {
 		mock_cache.EXPECT().Get(gomock.Any(), userid).Return(fakeData, nil)
 
 		mock_database.EXPECT().GetUserByID(gomock.Any(), userid).Return(&entities_user_v1.User{
-			ID:         userid,
-			ExternalID: "testuser",
-			Username:   "username",
-			Email:      "testuser@test.com",
-			CreatedAt:  created,
-			UpdatedAt:  created,
+			ID:        userid,
+			Username:  "username",
+			Email:     "testuser@test.com",
+			CreatedAt: created,
+			UpdatedAt: created,
 		}, nil)
 
 		userCached := &entities_user_v1.User{
-			ID:         userid,
-			ExternalID: "testuser",
-			Username:   "username",
-			Email:      "testuser@test.com",
-			CreatedAt:  created,
-			UpdatedAt:  created,
+			ID:        userid,
+			Username:  "username",
+			Email:     "testuser@test.com",
+			CreatedAt: created,
+			UpdatedAt: created,
 		}
 
 		userCachedBytes, _ := json.Marshal(userCached)
@@ -549,163 +518,6 @@ func Test_GetUserByID(t *testing.T) {
 		assert.NoError(t, err)
 
 		assert.Equal(t, userid, user.ID)
-		assert.Equal(t, "testuser", user.ExternalID)
-		assert.Equal(t, "username", user.Username)
-		assert.Equal(t, "testuser@test.com", user.Email)
-		assert.True(t, user.CreatedAt.Equal(created))
-		assert.True(t, user.UpdatedAt.Equal(created))
-	})
-}
-
-func Test_GetUserByExternalID(t *testing.T) {
-	t.Run("ok - get user by external_id from cache", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		mock_database := database_mocks.NewMockDatabase(ctrl)
-
-		userid := constants.GenerateDataPrefixWithULID(constants.User)
-		created := time.Now()
-
-		mock_cache := cache_mocks.NewMockCache(ctrl)
-
-		userCached := &entities_user_v1.User{
-			ID:         userid,
-			ExternalID: "testuser",
-			Username:   "username",
-			Email:      "testuser@test.com",
-			CreatedAt:  created,
-			UpdatedAt:  created,
-		}
-
-		userCachedBytes, _ := json.Marshal(userCached)
-
-		mock_cache.EXPECT().Get(gomock.Any(), "testuser").Return(string(userCachedBytes), nil)
-
-		s, err := NewUserStoreService(context.Background(), mock_database, mock_cache)
-		assert.NotNil(t, s)
-		assert.NoError(t, err)
-
-		user, err := s.GetUserByExternalID(context.Background(), "testuser")
-		assert.NotNil(t, user)
-		assert.NoError(t, err)
-
-		assert.Equal(t, userid, user.ID)
-		assert.Equal(t, "testuser", user.ExternalID)
-		assert.Equal(t, "username", user.Username)
-		assert.Equal(t, "testuser@test.com", user.Email)
-		assert.True(t, user.CreatedAt.Equal(created))
-		assert.True(t, user.UpdatedAt.Equal(created))
-	})
-	t.Run("ok - get user by external_id from database", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		mock_database := database_mocks.NewMockDatabase(ctrl)
-
-		userid := constants.GenerateDataPrefixWithULID(constants.User)
-		created := time.Now()
-
-		mock_database.EXPECT().GetUserByExternalID(gomock.Any(), "testuser").Return(&entities_user_v1.User{
-			ID:         userid,
-			ExternalID: "testuser",
-			Username:   "username",
-			Email:      "testuser@test.com",
-			CreatedAt:  created,
-			UpdatedAt:  created,
-		}, nil)
-
-		mock_cache := cache_mocks.NewMockCache(ctrl)
-
-		mock_cache.EXPECT().Get(gomock.Any(), "testuser").Return("", pkgerrors.NewNotFoundError("error"))
-
-		userCached := &entities_user_v1.User{
-			ID:         userid,
-			ExternalID: "testuser",
-			Username:   "username",
-			Email:      "testuser@test.com",
-			CreatedAt:  created,
-			UpdatedAt:  created,
-		}
-
-		userCachedBytes, _ := json.Marshal(userCached)
-
-		mock_cache.EXPECT().SetEx(gomock.Any(), fmt.Sprintf("user-store-svc:user:external_id:%+v", "testuser"), userCachedBytes, time.Hour*24).Return(nil)
-
-		s, err := NewUserStoreService(context.Background(), mock_database, mock_cache)
-		assert.NotNil(t, s)
-		assert.NoError(t, err)
-
-		user, err := s.GetUserByExternalID(context.Background(), "testuser")
-		assert.NotNil(t, user)
-		assert.NoError(t, err)
-
-		assert.Equal(t, userid, user.ID)
-		assert.Equal(t, "testuser", user.ExternalID)
-		assert.Equal(t, "username", user.Username)
-		assert.Equal(t, "testuser@test.com", user.Email)
-		assert.True(t, user.CreatedAt.Equal(created))
-		assert.True(t, user.UpdatedAt.Equal(created))
-	})
-	t.Run("nok - get user by external_id from database", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		mock_database := database_mocks.NewMockDatabase(ctrl)
-
-		mock_database.EXPECT().GetUserByID(gomock.Any(), "testuser").Return(nil, pkgerrors.NewNotFoundError("error"))
-
-		mock_cache := cache_mocks.NewMockCache(ctrl)
-
-		mock_cache.EXPECT().Get(gomock.Any(), "testuser").Return("", pkgerrors.NewNotFoundError("error"))
-
-		s, err := NewUserStoreService(context.Background(), mock_database, mock_cache)
-		assert.NotNil(t, s)
-		assert.NoError(t, err)
-
-		user, err := s.GetUserByID(context.Background(), "testuser")
-		assert.Nil(t, user)
-		assert.Error(t, err)
-	})
-	t.Run("ok - get user by external_id when get cache", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		mock_database := database_mocks.NewMockDatabase(ctrl)
-
-		mock_cache := cache_mocks.NewMockCache(ctrl)
-
-		userid := constants.GenerateDataPrefixWithULID(constants.User)
-		created := time.Now()
-
-		fakeData := `abczd{>`
-
-		mock_cache.EXPECT().Get(gomock.Any(), "testuser").Return(fakeData, nil)
-
-		mock_database.EXPECT().GetUserByExternalID(gomock.Any(), "testuser").Return(&entities_user_v1.User{
-			ID:         userid,
-			ExternalID: "testuser",
-			Username:   "username",
-			Email:      "testuser@test.com",
-			CreatedAt:  created,
-			UpdatedAt:  created,
-		}, nil)
-
-		userCached := &entities_user_v1.User{
-			ID:         userid,
-			ExternalID: "testuser",
-			Username:   "username",
-			Email:      "testuser@test.com",
-			CreatedAt:  created,
-			UpdatedAt:  created,
-		}
-
-		userCachedBytes, _ := json.Marshal(userCached)
-
-		mock_cache.EXPECT().SetEx(gomock.Any(), fmt.Sprintf("user-store-svc:user:external_id:%+v", "testuser"), userCachedBytes, time.Hour*24).Return(nil)
-
-		s, err := NewUserStoreService(context.Background(), mock_database, mock_cache)
-		assert.NotNil(t, s)
-		assert.NoError(t, err)
-
-		user, err := s.GetUserByExternalID(context.Background(), "testuser")
-		assert.NotNil(t, user)
-		assert.NoError(t, err)
-
-		assert.Equal(t, userid, user.ID)
-		assert.Equal(t, "testuser", user.ExternalID)
 		assert.Equal(t, "username", user.Username)
 		assert.Equal(t, "testuser@test.com", user.Email)
 		assert.True(t, user.CreatedAt.Equal(created))
@@ -723,16 +535,14 @@ func Test_UpdateUsername(t *testing.T) {
 
 		mock_cache := cache_mocks.NewMockCache(ctrl)
 		mock_database.EXPECT().UpdateUsername(gomock.Any(), userid, "username").Return(&entities_user_v1.User{
-			ID:         userid,
-			ExternalID: "testuser",
-			Username:   "username",
-			Email:      "testuser@test.com",
-			CreatedAt:  created,
-			UpdatedAt:  created,
+			ID:        userid,
+			Username:  "username",
+			Email:     "testuser@test.com",
+			CreatedAt: created,
+			UpdatedAt: created,
 		}, nil)
 
 		mock_cache.EXPECT().Del(gomock.Any(), userid).Return(nil)
-		mock_cache.EXPECT().Del(gomock.Any(), "testuser").Return(nil)
 		mock_cache.EXPECT().Del(gomock.Any(), "username").Return(nil)
 		mock_cache.EXPECT().Del(gomock.Any(), "testuser@test.com").Return(nil)
 
@@ -745,7 +555,6 @@ func Test_UpdateUsername(t *testing.T) {
 		assert.NoError(t, err)
 
 		assert.Equal(t, userid, user.ID)
-		assert.Equal(t, "testuser", user.ExternalID)
 		assert.Equal(t, "username", user.Username)
 		assert.Equal(t, "testuser@test.com", user.Email)
 		assert.True(t, user.CreatedAt.Equal(created))

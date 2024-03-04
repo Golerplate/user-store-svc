@@ -2,7 +2,6 @@
 -- +goose StatementBegin
 CREATE TABLE users (
     id           VARCHAR(40) PRIMARY KEY NOT NULL,
-    external_id  VARCHAR(40) NOT NULL,
     username    VARCHAR(255) NOT NULL,
     email       VARCHAR(255) NOT NULL,
     created_at   TIMESTAMP(6) NOT NULL,

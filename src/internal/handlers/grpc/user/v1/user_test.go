@@ -30,19 +30,15 @@ func Test_CreateUser(t *testing.T) {
 		userid := constants.GenerateDataPrefixWithULID(constants.User)
 		created := time.Now()
 
-		m.EXPECT().CreateUser(gomock.Any(), gomock.Any()).Do(
-			func(ctx context.Context, req *entities_user_v1.ServiceCreateUserRequest) {
-				assert.Equal(t, "testuser", req.ExternalID)
-				assert.Equal(t, "testuser@test.com", req.Email)
-				assert.NotEmpty(t, req.Username)
-			},
-		).Return(&entities_user_v1.User{
-			ID:         userid,
-			ExternalID: "testuser",
-			Username:   gomock.Any().String(),
-			Email:      "testuser@test.com",
-			CreatedAt:  created,
-			UpdatedAt:  created,
+		m.EXPECT().CreateUser(gomock.Any(), &entities_user_v1.CreateUserRequest{
+			Username: "Teyz",
+			Email:    "testuser@test.com",
+		}).Return(&entities_user_v1.User{
+			ID:        userid,
+			Username:  "Teyz",
+			Email:     "testuser@test.com",
+			CreatedAt: created,
+			UpdatedAt: created,
 		}, nil)
 
 		mock_cache := cache_mocks.NewMockCache(ctrl)
@@ -57,8 +53,8 @@ func Test_CreateUser(t *testing.T) {
 
 		req := &connectgo.Request[userv1.CreateUserRequest]{
 			Msg: &userv1.CreateUserRequest{
-				ExternalId: &wrapperspb.StringValue{Value: "testuser"},
-				Email:      &wrapperspb.StringValue{Value: "testuser@test.com"},
+				Username: &wrapperspb.StringValue{Value: "Teyz"},
+				Email:    &wrapperspb.StringValue{Value: "testuser@test.com"},
 			},
 		}
 
@@ -68,12 +64,11 @@ func Test_CreateUser(t *testing.T) {
 
 		assert.EqualValues(t, connectgo.NewResponse(&userv1.CreateUserResponse{
 			User: &userv1.User{
-				Id:         &wrappers.StringValue{Value: userid},
-				ExternalId: &wrappers.StringValue{Value: "testuser"},
-				Username:   &wrappers.StringValue{Value: gomock.Any().String()},
-				Email:      &wrappers.StringValue{Value: "testuser@test.com"},
-				CreatedAt:  &timestamppb.Timestamp{Seconds: int64(created.Second()), Nanos: int32(created.Nanosecond())},
-				UpdatedAt:  &timestamppb.Timestamp{Seconds: int64(created.Second()), Nanos: int32(created.Nanosecond())},
+				Id:        &wrappers.StringValue{Value: userid},
+				Username:  &wrappers.StringValue{Value: "Teyz"},
+				Email:     &wrappers.StringValue{Value: "testuser@test.com"},
+				CreatedAt: &timestamppb.Timestamp{Seconds: int64(created.Second()), Nanos: int32(created.Nanosecond())},
+				UpdatedAt: &timestamppb.Timestamp{Seconds: int64(created.Second()), Nanos: int32(created.Nanosecond())},
 			},
 		}), user)
 	})
@@ -81,13 +76,10 @@ func Test_CreateUser(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		m := database_mocks.NewMockDatabase(ctrl)
 
-		m.EXPECT().CreateUser(gomock.Any(), gomock.Any()).Do(
-			func(ctx context.Context, req *entities_user_v1.ServiceCreateUserRequest) {
-				assert.Equal(t, "testuser", req.ExternalID)
-				assert.Equal(t, "testuser@test.com", req.Email)
-				assert.NotEmpty(t, req.Username)
-			},
-		).Return(nil, pkgerrors.NewInternalServerError("error"))
+		m.EXPECT().CreateUser(gomock.Any(), &entities_user_v1.CreateUserRequest{
+			Username: "Teyz",
+			Email:    "testuser@test.com",
+		}).Return(nil, pkgerrors.NewInternalServerError("error"))
 
 		mock_cache := cache_mocks.NewMockCache(ctrl)
 
@@ -101,8 +93,8 @@ func Test_CreateUser(t *testing.T) {
 
 		req := &connectgo.Request[userv1.CreateUserRequest]{
 			Msg: &userv1.CreateUserRequest{
-				ExternalId: &wrapperspb.StringValue{Value: "testuser"},
-				Email:      &wrapperspb.StringValue{Value: "testuser@test.com"},
+				Username: &wrapperspb.StringValue{Value: "Teyz"},
+				Email:    &wrapperspb.StringValue{Value: "testuser@test.com"},
 			},
 		}
 
@@ -110,7 +102,7 @@ func Test_CreateUser(t *testing.T) {
 		assert.Nil(t, user)
 		assert.Error(t, err)
 	})
-	t.Run("nok - create user without external_id", func(t *testing.T) {
+	t.Run("nok - create user without username", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		m := database_mocks.NewMockDatabase(ctrl)
 
@@ -126,8 +118,8 @@ func Test_CreateUser(t *testing.T) {
 
 		req := &connectgo.Request[userv1.CreateUserRequest]{
 			Msg: &userv1.CreateUserRequest{
-				ExternalId: &wrapperspb.StringValue{Value: ""},
-				Email:      &wrapperspb.StringValue{Value: "testuser@test.com"},
+				Username: &wrapperspb.StringValue{Value: ""},
+				Email:    &wrapperspb.StringValue{Value: "testuser@test.com"},
 			},
 		}
 
@@ -152,8 +144,8 @@ func Test_CreateUser(t *testing.T) {
 
 		req := &connectgo.Request[userv1.CreateUserRequest]{
 			Msg: &userv1.CreateUserRequest{
-				ExternalId: &wrapperspb.StringValue{Value: "testuser"},
-				Email:      &wrapperspb.StringValue{Value: ""},
+				Username: &wrapperspb.StringValue{Value: "testuser"},
+				Email:    &wrapperspb.StringValue{Value: ""},
 			},
 		}
 
@@ -175,12 +167,11 @@ func Test_GetUserByEmail(t *testing.T) {
 		mock_cache := cache_mocks.NewMockCache(ctrl)
 
 		userCached := &entities_user_v1.User{
-			ID:         userid,
-			ExternalID: "testuser",
-			Username:   "username",
-			Email:      "testuser@test.com",
-			CreatedAt:  created,
-			UpdatedAt:  created,
+			ID:        userid,
+			Username:  "username",
+			Email:     "testuser@test.com",
+			CreatedAt: created,
+			UpdatedAt: created,
 		}
 
 		userCachedBytes, _ := json.Marshal(userCached)
@@ -207,12 +198,11 @@ func Test_GetUserByEmail(t *testing.T) {
 
 		assert.EqualValues(t, connectgo.NewResponse(&userv1.GetUserByEmailResponse{
 			User: &userv1.User{
-				Id:         &wrappers.StringValue{Value: userid},
-				ExternalId: &wrappers.StringValue{Value: "testuser"},
-				Username:   &wrappers.StringValue{Value: "username"},
-				Email:      &wrappers.StringValue{Value: "testuser@test.com"},
-				CreatedAt:  &timestamppb.Timestamp{Seconds: int64(created.Second()), Nanos: int32(created.Nanosecond())},
-				UpdatedAt:  &timestamppb.Timestamp{Seconds: int64(created.Second()), Nanos: int32(created.Nanosecond())},
+				Id:        &wrappers.StringValue{Value: userid},
+				Username:  &wrappers.StringValue{Value: "username"},
+				Email:     &wrappers.StringValue{Value: "testuser@test.com"},
+				CreatedAt: &timestamppb.Timestamp{Seconds: int64(created.Second()), Nanos: int32(created.Nanosecond())},
+				UpdatedAt: &timestamppb.Timestamp{Seconds: int64(created.Second()), Nanos: int32(created.Nanosecond())},
 			},
 		}), user)
 	})
@@ -284,12 +274,11 @@ func Test_GetUserByID(t *testing.T) {
 		mock_cache := cache_mocks.NewMockCache(ctrl)
 
 		userCached := &entities_user_v1.User{
-			ID:         userid,
-			ExternalID: "testuser",
-			Username:   "username",
-			Email:      "testuser@test.com",
-			CreatedAt:  created,
-			UpdatedAt:  created,
+			ID:        userid,
+			Username:  "username",
+			Email:     "testuser@test.com",
+			CreatedAt: created,
+			UpdatedAt: created,
 		}
 
 		userCachedBytes, _ := json.Marshal(userCached)
@@ -316,12 +305,11 @@ func Test_GetUserByID(t *testing.T) {
 
 		assert.EqualValues(t, connectgo.NewResponse(&userv1.GetUserByIDResponse{
 			User: &userv1.User{
-				Id:         &wrappers.StringValue{Value: userid},
-				ExternalId: &wrappers.StringValue{Value: "testuser"},
-				Username:   &wrappers.StringValue{Value: "username"},
-				Email:      &wrappers.StringValue{Value: "testuser@test.com"},
-				CreatedAt:  &timestamppb.Timestamp{Seconds: int64(created.Second()), Nanos: int32(created.Nanosecond())},
-				UpdatedAt:  &timestamppb.Timestamp{Seconds: int64(created.Second()), Nanos: int32(created.Nanosecond())},
+				Id:        &wrappers.StringValue{Value: userid},
+				Username:  &wrappers.StringValue{Value: "username"},
+				Email:     &wrappers.StringValue{Value: "testuser@test.com"},
+				CreatedAt: &timestamppb.Timestamp{Seconds: int64(created.Second()), Nanos: int32(created.Nanosecond())},
+				UpdatedAt: &timestamppb.Timestamp{Seconds: int64(created.Second()), Nanos: int32(created.Nanosecond())},
 			},
 		}), user)
 	})
@@ -395,12 +383,11 @@ func Test_GetUserByUsername(t *testing.T) {
 		mock_cache := cache_mocks.NewMockCache(ctrl)
 
 		userCached := &entities_user_v1.User{
-			ID:         userid,
-			ExternalID: "testuser",
-			Username:   "username",
-			Email:      "testuser@test.com",
-			CreatedAt:  created,
-			UpdatedAt:  created,
+			ID:        userid,
+			Username:  "username",
+			Email:     "testuser@test.com",
+			CreatedAt: created,
+			UpdatedAt: created,
 		}
 
 		userCachedBytes, _ := json.Marshal(userCached)
@@ -427,12 +414,11 @@ func Test_GetUserByUsername(t *testing.T) {
 
 		assert.EqualValues(t, connectgo.NewResponse(&userv1.GetUserByUsernameResponse{
 			User: &userv1.User{
-				Id:         &wrappers.StringValue{Value: userid},
-				ExternalId: &wrappers.StringValue{Value: "testuser"},
-				Username:   &wrappers.StringValue{Value: "username"},
-				Email:      &wrappers.StringValue{Value: "testuser@test.com"},
-				CreatedAt:  &timestamppb.Timestamp{Seconds: int64(created.Second()), Nanos: int32(created.Nanosecond())},
-				UpdatedAt:  &timestamppb.Timestamp{Seconds: int64(created.Second()), Nanos: int32(created.Nanosecond())},
+				Id:        &wrappers.StringValue{Value: userid},
+				Username:  &wrappers.StringValue{Value: "username"},
+				Email:     &wrappers.StringValue{Value: "testuser@test.com"},
+				CreatedAt: &timestamppb.Timestamp{Seconds: int64(created.Second()), Nanos: int32(created.Nanosecond())},
+				UpdatedAt: &timestamppb.Timestamp{Seconds: int64(created.Second()), Nanos: int32(created.Nanosecond())},
 			},
 		}), user)
 	})
@@ -493,115 +479,6 @@ func Test_GetUserByUsername(t *testing.T) {
 	})
 }
 
-func Test_GetUserByExternalID(t *testing.T) {
-	t.Run("ok - get user by external_id", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		m := database_mocks.NewMockDatabase(ctrl)
-
-		userid := constants.GenerateDataPrefixWithULID(constants.User)
-		created := time.Now()
-
-		mock_cache := cache_mocks.NewMockCache(ctrl)
-
-		userCached := &entities_user_v1.User{
-			ID:         userid,
-			ExternalID: "testuser",
-			Username:   "username",
-			Email:      "testuser@test.com",
-			CreatedAt:  created,
-			UpdatedAt:  created,
-		}
-
-		userCachedBytes, _ := json.Marshal(userCached)
-
-		mock_cache.EXPECT().Get(gomock.Any(), "testuser").Return(string(userCachedBytes), nil)
-
-		service, err := service_v1.NewUserStoreService(context.Background(), m, mock_cache)
-		assert.NotNil(t, service)
-		assert.NoError(t, err)
-
-		h, err := NewUserStoreServiceHandler(context.Background(), service)
-		assert.NotNil(t, h)
-		assert.NoError(t, err)
-
-		req := &connectgo.Request[userv1.GetUserByExternalIDRequest]{
-			Msg: &userv1.GetUserByExternalIDRequest{
-				ExternalId: &wrapperspb.StringValue{Value: "testuser"},
-			},
-		}
-
-		user, err := h.GetUserByExternalID(context.Background(), req)
-		assert.NotNil(t, user)
-		assert.NoError(t, err)
-
-		assert.EqualValues(t, connectgo.NewResponse(&userv1.GetUserByExternalIDResponse{
-			User: &userv1.User{
-				Id:         &wrappers.StringValue{Value: userid},
-				ExternalId: &wrappers.StringValue{Value: "testuser"},
-				Username:   &wrappers.StringValue{Value: "username"},
-				Email:      &wrappers.StringValue{Value: "testuser@test.com"},
-				CreatedAt:  &timestamppb.Timestamp{Seconds: int64(created.Second()), Nanos: int32(created.Nanosecond())},
-				UpdatedAt:  &timestamppb.Timestamp{Seconds: int64(created.Second()), Nanos: int32(created.Nanosecond())},
-			},
-		}), user)
-	})
-	t.Run("nok - get user by external_id", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		m := database_mocks.NewMockDatabase(ctrl)
-
-		m.EXPECT().GetUserByExternalID(gomock.Any(), "testuser").Return(nil, pkgerrors.NewInternalServerError("error"))
-
-		mock_cache := cache_mocks.NewMockCache(ctrl)
-
-		fakeData := `abczd{>`
-
-		mock_cache.EXPECT().Get(gomock.Any(), "testuser").Return(fakeData, nil)
-
-		service, err := service_v1.NewUserStoreService(context.Background(), m, mock_cache)
-		assert.NotNil(t, service)
-		assert.NoError(t, err)
-
-		h, err := NewUserStoreServiceHandler(context.Background(), service)
-		assert.NotNil(t, h)
-		assert.NoError(t, err)
-
-		req := &connectgo.Request[userv1.GetUserByExternalIDRequest]{
-			Msg: &userv1.GetUserByExternalIDRequest{
-				ExternalId: &wrapperspb.StringValue{Value: "testuser"},
-			},
-		}
-
-		user, err := h.GetUserByExternalID(context.Background(), req)
-		assert.Nil(t, user)
-		assert.Error(t, err)
-	})
-	t.Run("nok - get user without external_id", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		m := database_mocks.NewMockDatabase(ctrl)
-
-		mock_cache := cache_mocks.NewMockCache(ctrl)
-
-		service, err := service_v1.NewUserStoreService(context.Background(), m, mock_cache)
-		assert.NotNil(t, service)
-		assert.NoError(t, err)
-
-		h, err := NewUserStoreServiceHandler(context.Background(), service)
-		assert.NotNil(t, h)
-		assert.NoError(t, err)
-
-		req := &connectgo.Request[userv1.GetUserByExternalIDRequest]{
-			Msg: &userv1.GetUserByExternalIDRequest{
-				ExternalId: &wrapperspb.StringValue{Value: ""},
-			},
-		}
-
-		user, err := h.GetUserByExternalID(context.Background(), req)
-		assert.Nil(t, user)
-		assert.Error(t, err)
-		assert.Equal(t, connectgo.CodeInvalidArgument, connectgo.CodeOf(err))
-	})
-}
-
 func Test_UpdateUsername(t *testing.T) {
 	t.Run("ok - update username", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
@@ -613,15 +490,13 @@ func Test_UpdateUsername(t *testing.T) {
 		mock_cache := cache_mocks.NewMockCache(ctrl)
 
 		m.EXPECT().UpdateUsername(gomock.Any(), userid, "username").Return(&entities_user_v1.User{
-			ID:         userid,
-			ExternalID: "testuser",
-			Username:   gomock.Any().String(),
-			Email:      "testuser@test.com",
-			CreatedAt:  created,
-			UpdatedAt:  created,
+			ID:        userid,
+			Username:  "username",
+			Email:     "testuser@test.com",
+			CreatedAt: created,
+			UpdatedAt: created,
 		}, nil)
 
-		mock_cache.EXPECT().Del(gomock.Any(), gomock.Any()).Return(nil)
 		mock_cache.EXPECT().Del(gomock.Any(), gomock.Any()).Return(nil)
 		mock_cache.EXPECT().Del(gomock.Any(), gomock.Any()).Return(nil)
 		mock_cache.EXPECT().Del(gomock.Any(), gomock.Any()).Return(nil)
@@ -647,12 +522,11 @@ func Test_UpdateUsername(t *testing.T) {
 
 		assert.EqualValues(t, connectgo.NewResponse(&userv1.UpdateUsernameResponse{
 			User: &userv1.User{
-				Id:         &wrappers.StringValue{Value: userid},
-				ExternalId: &wrappers.StringValue{Value: "testuser"},
-				Username:   &wrappers.StringValue{Value: gomock.Any().String()},
-				Email:      &wrappers.StringValue{Value: "testuser@test.com"},
-				CreatedAt:  &timestamppb.Timestamp{Seconds: int64(created.Second()), Nanos: int32(created.Nanosecond())},
-				UpdatedAt:  &timestamppb.Timestamp{Seconds: int64(created.Second()), Nanos: int32(created.Nanosecond())},
+				Id:        &wrappers.StringValue{Value: userid},
+				Username:  &wrappers.StringValue{Value: "username"},
+				Email:     &wrappers.StringValue{Value: "testuser@test.com"},
+				CreatedAt: &timestamppb.Timestamp{Seconds: int64(created.Second()), Nanos: int32(created.Nanosecond())},
+				UpdatedAt: &timestamppb.Timestamp{Seconds: int64(created.Second()), Nanos: int32(created.Nanosecond())},
 			},
 		}), user)
 	})

@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/brianvoe/gofakeit/v6"
 	"github.com/rs/zerolog/log"
 
 	entities_user_v1 "github.com/golerplate/user-store-svc/internal/entities/user/v1"
@@ -27,14 +26,6 @@ func (s *service) clearCacheForUser(ctx context.Context, user *entities_user_v1.
 		return err
 	}
 
-	err = s.cache.Del(ctx, user.ExternalID)
-	if err != nil {
-		log.Error().Err(err).
-			Str("external_id", user.ExternalID).
-			Msg("service.v1.service.clearCacheForUser: unable to delete user from cache by external_id")
-		return err
-	}
-
 	err = s.cache.Del(ctx, user.Email)
 	if err != nil {
 		log.Error().Err(err).
@@ -46,12 +37,8 @@ func (s *service) clearCacheForUser(ctx context.Context, user *entities_user_v1.
 	return nil
 }
 
-func (s *service) CreateUser(ctx context.Context, req *entities_user_v1.GRPCCreateUserRequest) (*entities_user_v1.User, error) {
-	user, err := s.store.CreateUser(ctx, &entities_user_v1.ServiceCreateUserRequest{
-		ExternalID: req.ExternalID,
-		Email:      req.Email,
-		Username:   gofakeit.Username(),
-	})
+func (s *service) CreateUser(ctx context.Context, req *entities_user_v1.CreateUserRequest) (*entities_user_v1.User, error) {
+	user, err := s.store.CreateUser(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -147,37 +134,6 @@ func (s *service) GetUserByUsername(ctx context.Context, username string) (*enti
 			Msg("service.v1.service.GetUserByID: unable to marshal user")
 	} else {
 		_ = s.cache.SetEx(ctx, generateUserCacheKeyWithUsername(username), bytes, userCacheDuration)
-	}
-
-	return user, nil
-}
-
-func (s *service) GetUserByExternalID(ctx context.Context, externalID string) (*entities_user_v1.User, error) {
-	cachedUser, err := s.cache.Get(ctx, externalID)
-	if err == nil {
-		var user *entities_user_v1.User
-		err = json.Unmarshal([]byte(cachedUser), &user)
-		if err != nil {
-			log.Error().Err(err).
-				Str("user_id", externalID).
-				Msg("service.v1.service.GetUserByExternalID: unable to unmarshall user")
-		} else {
-			return user, nil
-		}
-	}
-
-	user, err := s.store.GetUserByExternalID(ctx, externalID)
-	if err != nil {
-		return nil, err
-	}
-
-	bytes, err := json.Marshal(user)
-	if err != nil {
-		log.Error().Err(err).
-			Str("user_id", externalID).
-			Msg("service.v1.service.GetUserByExternalID: unable to marshal user")
-	} else {
-		_ = s.cache.SetEx(ctx, generateUserCacheKeyWithExternalID(externalID), bytes, userCacheDuration)
 	}
 
 	return user, nil
