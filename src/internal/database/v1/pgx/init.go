@@ -1,4 +1,4 @@
-package database_pgx_v1
+package database_v1_pgx
 
 import (
 	"context"
