@@ -70,21 +70,6 @@ func (mr *MockDatabaseMockRecorder) GetUserByEmail(ctx, email any) *gomock.Call 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByEmail", reflect.TypeOf((*MockDatabase)(nil).GetUserByEmail), ctx, email)
 }
 
-// GetUserByExternalID mocks base method.
-func (m *MockDatabase) GetUserByExternalID(ctx context.Context, externalID string) (*entities_user_v1.User, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetUserByExternalID", ctx, externalID)
-	ret0, _ := ret[0].(*entities_user_v1.User)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetUserByExternalID indicates an expected call of GetUserByExternalID.
-func (mr *MockDatabaseMockRecorder) GetUserByExternalID(ctx, externalID any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByExternalID", reflect.TypeOf((*MockDatabase)(nil).GetUserByExternalID), ctx, externalID)
-}
-
 // GetUserByID mocks base method.
 func (m *MockDatabase) GetUserByID(ctx context.Context, id string) (*entities_user_v1.User, error) {
 	m.ctrl.T.Helper()

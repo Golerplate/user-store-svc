@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/golerplate/pkg/cache"
-	database_v1 "github.com/golerplate/user-store-svc/internal/database/v1"
+	database_v2 "github.com/golerplate/user-store-svc/internal/database/v2"
 )
 
 const (
@@ -30,11 +30,11 @@ func generateUserCacheKeyWithExternalID(externalID string) string {
 }
 
 type service struct {
-	store database_v1.Database
+	store database_v2.Database
 	cache cache.Cache
 }
 
-func NewUserStoreService(ctx context.Context, store database_v1.Database, cache cache.Cache) (*service, error) {
+func NewUserStoreService(ctx context.Context, store database_v2.Database, cache cache.Cache) (*service, error) {
 	return &service{
 		store: store,
 		cache: cache,

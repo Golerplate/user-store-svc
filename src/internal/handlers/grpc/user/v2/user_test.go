@@ -8,7 +8,7 @@ import (
 
 	connectgo "github.com/bufbuild/connect-go"
 	"github.com/golang/protobuf/ptypes/wrappers"
-	userv1 "github.com/golerplate/contracts/generated/services/user/store/svc/v1"
+	userv2 "github.com/golerplate/contracts/generated/services/user/store/svc/v2"
 	cache_mocks "github.com/golerplate/pkg/cache/mocks"
 	"github.com/golerplate/pkg/constants"
 	pkgerrors "github.com/golerplate/pkg/errors"
@@ -17,9 +17,9 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 
-	database_mocks "github.com/golerplate/user-store-svc/internal/database/v1/mocks"
-	entities_user_v1 "github.com/golerplate/user-store-svc/internal/entities/user/v1"
-	service_v1 "github.com/golerplate/user-store-svc/internal/service/v1"
+	database_mocks "github.com/golerplate/user-store-svc/internal/database/v2/mocks"
+	entities_user_v2 "github.com/golerplate/user-store-svc/internal/entities/user/v2"
+	service_v2 "github.com/golerplate/user-store-svc/internal/service/v2"
 )
 
 func Test_CreateUser(t *testing.T) {
@@ -30,20 +30,21 @@ func Test_CreateUser(t *testing.T) {
 		userid := constants.GenerateDataPrefixWithULID(constants.User)
 		created := time.Now()
 
-		m.EXPECT().CreateUser(gomock.Any(), &entities_user_v1.CreateUserRequest{
+		m.EXPECT().CreateUser(gomock.Any(), &entities_user_v2.CreateUserRequest{
 			Username: "Teyz",
 			Email:    "testuser@test.com",
-		}).Return(&entities_user_v1.User{
+		}).Return(&entities_user_v2.User{
 			ID:        userid,
 			Username:  "Teyz",
 			Email:     "testuser@test.com",
+			IsBanned:  false,
 			CreatedAt: created,
 			UpdatedAt: created,
 		}, nil)
 
 		mock_cache := cache_mocks.NewMockCache(ctrl)
 
-		service, err := service_v1.NewUserStoreService(context.Background(), m, mock_cache)
+		service, err := service_v2.NewUserStoreService(context.Background(), m, mock_cache)
 		assert.NotNil(t, service)
 		assert.NoError(t, err)
 
@@ -51,8 +52,8 @@ func Test_CreateUser(t *testing.T) {
 		assert.NotNil(t, h)
 		assert.NoError(t, err)
 
-		req := &connectgo.Request[userv1.CreateUserRequest]{
-			Msg: &userv1.CreateUserRequest{
+		req := &connectgo.Request[userv2.CreateUserRequest]{
+			Msg: &userv2.CreateUserRequest{
 				Username: &wrapperspb.StringValue{Value: "Teyz"},
 				Email:    &wrapperspb.StringValue{Value: "testuser@test.com"},
 			},
@@ -62,8 +63,8 @@ func Test_CreateUser(t *testing.T) {
 		assert.NotNil(t, user)
 		assert.NoError(t, err)
 
-		assert.EqualValues(t, connectgo.NewResponse(&userv1.CreateUserResponse{
-			User: &userv1.User{
+		assert.EqualValues(t, connectgo.NewResponse(&userv2.CreateUserResponse{
+			User: &userv2.User{
 				Id:        &wrappers.StringValue{Value: userid},
 				Username:  &wrappers.StringValue{Value: "Teyz"},
 				Email:     &wrappers.StringValue{Value: "testuser@test.com"},
@@ -76,14 +77,14 @@ func Test_CreateUser(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		m := database_mocks.NewMockDatabase(ctrl)
 
-		m.EXPECT().CreateUser(gomock.Any(), &entities_user_v1.CreateUserRequest{
+		m.EXPECT().CreateUser(gomock.Any(), &entities_user_v2.CreateUserRequest{
 			Username: "Teyz",
 			Email:    "testuser@test.com",
 		}).Return(nil, pkgerrors.NewInternalServerError("error"))
 
 		mock_cache := cache_mocks.NewMockCache(ctrl)
 
-		service, err := service_v1.NewUserStoreService(context.Background(), m, mock_cache)
+		service, err := service_v2.NewUserStoreService(context.Background(), m, mock_cache)
 		assert.NotNil(t, service)
 		assert.NoError(t, err)
 
@@ -91,8 +92,8 @@ func Test_CreateUser(t *testing.T) {
 		assert.NotNil(t, h)
 		assert.NoError(t, err)
 
-		req := &connectgo.Request[userv1.CreateUserRequest]{
-			Msg: &userv1.CreateUserRequest{
+		req := &connectgo.Request[userv2.CreateUserRequest]{
+			Msg: &userv2.CreateUserRequest{
 				Username: &wrapperspb.StringValue{Value: "Teyz"},
 				Email:    &wrapperspb.StringValue{Value: "testuser@test.com"},
 			},
@@ -108,7 +109,7 @@ func Test_CreateUser(t *testing.T) {
 
 		mock_cache := cache_mocks.NewMockCache(ctrl)
 
-		service, err := service_v1.NewUserStoreService(context.Background(), m, mock_cache)
+		service, err := service_v2.NewUserStoreService(context.Background(), m, mock_cache)
 		assert.NotNil(t, service)
 		assert.NoError(t, err)
 
@@ -116,8 +117,8 @@ func Test_CreateUser(t *testing.T) {
 		assert.NotNil(t, h)
 		assert.NoError(t, err)
 
-		req := &connectgo.Request[userv1.CreateUserRequest]{
-			Msg: &userv1.CreateUserRequest{
+		req := &connectgo.Request[userv2.CreateUserRequest]{
+			Msg: &userv2.CreateUserRequest{
 				Username: &wrapperspb.StringValue{Value: ""},
 				Email:    &wrapperspb.StringValue{Value: "testuser@test.com"},
 			},
@@ -134,7 +135,7 @@ func Test_CreateUser(t *testing.T) {
 
 		mock_cache := cache_mocks.NewMockCache(ctrl)
 
-		service, err := service_v1.NewUserStoreService(context.Background(), m, mock_cache)
+		service, err := service_v2.NewUserStoreService(context.Background(), m, mock_cache)
 		assert.NotNil(t, service)
 		assert.NoError(t, err)
 
@@ -142,8 +143,8 @@ func Test_CreateUser(t *testing.T) {
 		assert.NotNil(t, h)
 		assert.NoError(t, err)
 
-		req := &connectgo.Request[userv1.CreateUserRequest]{
-			Msg: &userv1.CreateUserRequest{
+		req := &connectgo.Request[userv2.CreateUserRequest]{
+			Msg: &userv2.CreateUserRequest{
 				Username: &wrapperspb.StringValue{Value: "testuser"},
 				Email:    &wrapperspb.StringValue{Value: ""},
 			},
@@ -166,7 +167,7 @@ func Test_GetUserByEmail(t *testing.T) {
 
 		mock_cache := cache_mocks.NewMockCache(ctrl)
 
-		userCached := &entities_user_v1.User{
+		userCached := &entities_user_v2.User{
 			ID:        userid,
 			Username:  "username",
 			Email:     "testuser@test.com",
@@ -178,7 +179,7 @@ func Test_GetUserByEmail(t *testing.T) {
 
 		mock_cache.EXPECT().Get(gomock.Any(), "testuser@test.com").Return(string(userCachedBytes), nil)
 
-		service, err := service_v1.NewUserStoreService(context.Background(), m, mock_cache)
+		service, err := service_v2.NewUserStoreService(context.Background(), m, mock_cache)
 		assert.NotNil(t, service)
 		assert.NoError(t, err)
 
@@ -186,8 +187,8 @@ func Test_GetUserByEmail(t *testing.T) {
 		assert.NotNil(t, h)
 		assert.NoError(t, err)
 
-		req := &connectgo.Request[userv1.GetUserByEmailRequest]{
-			Msg: &userv1.GetUserByEmailRequest{
+		req := &connectgo.Request[userv2.GetUserByEmailRequest]{
+			Msg: &userv2.GetUserByEmailRequest{
 				Email: &wrapperspb.StringValue{Value: "testuser@test.com"},
 			},
 		}
@@ -196,8 +197,8 @@ func Test_GetUserByEmail(t *testing.T) {
 		assert.NotNil(t, user)
 		assert.NoError(t, err)
 
-		assert.EqualValues(t, connectgo.NewResponse(&userv1.GetUserByEmailResponse{
-			User: &userv1.User{
+		assert.EqualValues(t, connectgo.NewResponse(&userv2.GetUserByEmailResponse{
+			User: &userv2.User{
 				Id:        &wrappers.StringValue{Value: userid},
 				Username:  &wrappers.StringValue{Value: "username"},
 				Email:     &wrappers.StringValue{Value: "testuser@test.com"},
@@ -218,7 +219,7 @@ func Test_GetUserByEmail(t *testing.T) {
 
 		mock_cache.EXPECT().Get(gomock.Any(), "testuser@test.com").Return(fakeData, nil)
 
-		service, err := service_v1.NewUserStoreService(context.Background(), m, mock_cache)
+		service, err := service_v2.NewUserStoreService(context.Background(), m, mock_cache)
 		assert.NotNil(t, service)
 		assert.NoError(t, err)
 
@@ -226,8 +227,8 @@ func Test_GetUserByEmail(t *testing.T) {
 		assert.NotNil(t, h)
 		assert.NoError(t, err)
 
-		req := &connectgo.Request[userv1.GetUserByEmailRequest]{
-			Msg: &userv1.GetUserByEmailRequest{
+		req := &connectgo.Request[userv2.GetUserByEmailRequest]{
+			Msg: &userv2.GetUserByEmailRequest{
 				Email: &wrapperspb.StringValue{Value: "testuser@test.com"},
 			},
 		}
@@ -242,7 +243,7 @@ func Test_GetUserByEmail(t *testing.T) {
 
 		mock_cache := cache_mocks.NewMockCache(ctrl)
 
-		service, err := service_v1.NewUserStoreService(context.Background(), m, mock_cache)
+		service, err := service_v2.NewUserStoreService(context.Background(), m, mock_cache)
 		assert.NotNil(t, service)
 		assert.NoError(t, err)
 
@@ -250,8 +251,8 @@ func Test_GetUserByEmail(t *testing.T) {
 		assert.NotNil(t, h)
 		assert.NoError(t, err)
 
-		req := &connectgo.Request[userv1.GetUserByEmailRequest]{
-			Msg: &userv1.GetUserByEmailRequest{
+		req := &connectgo.Request[userv2.GetUserByEmailRequest]{
+			Msg: &userv2.GetUserByEmailRequest{
 				Email: &wrapperspb.StringValue{Value: ""},
 			},
 		}
@@ -273,7 +274,7 @@ func Test_GetUserByID(t *testing.T) {
 
 		mock_cache := cache_mocks.NewMockCache(ctrl)
 
-		userCached := &entities_user_v1.User{
+		userCached := &entities_user_v2.User{
 			ID:        userid,
 			Username:  "username",
 			Email:     "testuser@test.com",
@@ -285,7 +286,7 @@ func Test_GetUserByID(t *testing.T) {
 
 		mock_cache.EXPECT().Get(gomock.Any(), userid).Return(string(userCachedBytes), nil)
 
-		service, err := service_v1.NewUserStoreService(context.Background(), m, mock_cache)
+		service, err := service_v2.NewUserStoreService(context.Background(), m, mock_cache)
 		assert.NotNil(t, service)
 		assert.NoError(t, err)
 
@@ -293,8 +294,8 @@ func Test_GetUserByID(t *testing.T) {
 		assert.NotNil(t, h)
 		assert.NoError(t, err)
 
-		req := &connectgo.Request[userv1.GetUserByIDRequest]{
-			Msg: &userv1.GetUserByIDRequest{
+		req := &connectgo.Request[userv2.GetUserByIDRequest]{
+			Msg: &userv2.GetUserByIDRequest{
 				Id: &wrapperspb.StringValue{Value: userid},
 			},
 		}
@@ -303,8 +304,8 @@ func Test_GetUserByID(t *testing.T) {
 		assert.NotNil(t, user)
 		assert.NoError(t, err)
 
-		assert.EqualValues(t, connectgo.NewResponse(&userv1.GetUserByIDResponse{
-			User: &userv1.User{
+		assert.EqualValues(t, connectgo.NewResponse(&userv2.GetUserByIDResponse{
+			User: &userv2.User{
 				Id:        &wrappers.StringValue{Value: userid},
 				Username:  &wrappers.StringValue{Value: "username"},
 				Email:     &wrappers.StringValue{Value: "testuser@test.com"},
@@ -327,7 +328,7 @@ func Test_GetUserByID(t *testing.T) {
 
 		mock_cache.EXPECT().Get(gomock.Any(), userid).Return(fakeData, nil)
 
-		service, err := service_v1.NewUserStoreService(context.Background(), m, mock_cache)
+		service, err := service_v2.NewUserStoreService(context.Background(), m, mock_cache)
 		assert.NotNil(t, service)
 		assert.NoError(t, err)
 
@@ -335,8 +336,8 @@ func Test_GetUserByID(t *testing.T) {
 		assert.NotNil(t, h)
 		assert.NoError(t, err)
 
-		req := &connectgo.Request[userv1.GetUserByIDRequest]{
-			Msg: &userv1.GetUserByIDRequest{
+		req := &connectgo.Request[userv2.GetUserByIDRequest]{
+			Msg: &userv2.GetUserByIDRequest{
 				Id: &wrapperspb.StringValue{Value: userid},
 			},
 		}
@@ -351,7 +352,7 @@ func Test_GetUserByID(t *testing.T) {
 
 		mock_cache := cache_mocks.NewMockCache(ctrl)
 
-		service, err := service_v1.NewUserStoreService(context.Background(), m, mock_cache)
+		service, err := service_v2.NewUserStoreService(context.Background(), m, mock_cache)
 		assert.NotNil(t, service)
 		assert.NoError(t, err)
 
@@ -359,8 +360,8 @@ func Test_GetUserByID(t *testing.T) {
 		assert.NotNil(t, h)
 		assert.NoError(t, err)
 
-		req := &connectgo.Request[userv1.GetUserByIDRequest]{
-			Msg: &userv1.GetUserByIDRequest{
+		req := &connectgo.Request[userv2.GetUserByIDRequest]{
+			Msg: &userv2.GetUserByIDRequest{
 				Id: &wrapperspb.StringValue{Value: ""},
 			},
 		}
@@ -382,7 +383,7 @@ func Test_GetUserByUsername(t *testing.T) {
 
 		mock_cache := cache_mocks.NewMockCache(ctrl)
 
-		userCached := &entities_user_v1.User{
+		userCached := &entities_user_v2.User{
 			ID:        userid,
 			Username:  "username",
 			Email:     "testuser@test.com",
@@ -394,7 +395,7 @@ func Test_GetUserByUsername(t *testing.T) {
 
 		mock_cache.EXPECT().Get(gomock.Any(), "username").Return(string(userCachedBytes), nil)
 
-		service, err := service_v1.NewUserStoreService(context.Background(), m, mock_cache)
+		service, err := service_v2.NewUserStoreService(context.Background(), m, mock_cache)
 		assert.NotNil(t, service)
 		assert.NoError(t, err)
 
@@ -402,8 +403,8 @@ func Test_GetUserByUsername(t *testing.T) {
 		assert.NotNil(t, h)
 		assert.NoError(t, err)
 
-		req := &connectgo.Request[userv1.GetUserByUsernameRequest]{
-			Msg: &userv1.GetUserByUsernameRequest{
+		req := &connectgo.Request[userv2.GetUserByUsernameRequest]{
+			Msg: &userv2.GetUserByUsernameRequest{
 				Username: &wrapperspb.StringValue{Value: "username"},
 			},
 		}
@@ -412,8 +413,8 @@ func Test_GetUserByUsername(t *testing.T) {
 		assert.NotNil(t, user)
 		assert.NoError(t, err)
 
-		assert.EqualValues(t, connectgo.NewResponse(&userv1.GetUserByUsernameResponse{
-			User: &userv1.User{
+		assert.EqualValues(t, connectgo.NewResponse(&userv2.GetUserByUsernameResponse{
+			User: &userv2.User{
 				Id:        &wrappers.StringValue{Value: userid},
 				Username:  &wrappers.StringValue{Value: "username"},
 				Email:     &wrappers.StringValue{Value: "testuser@test.com"},
@@ -434,7 +435,7 @@ func Test_GetUserByUsername(t *testing.T) {
 
 		mock_cache.EXPECT().Get(gomock.Any(), "username").Return(fakeData, nil)
 
-		service, err := service_v1.NewUserStoreService(context.Background(), m, mock_cache)
+		service, err := service_v2.NewUserStoreService(context.Background(), m, mock_cache)
 		assert.NotNil(t, service)
 		assert.NoError(t, err)
 
@@ -442,8 +443,8 @@ func Test_GetUserByUsername(t *testing.T) {
 		assert.NotNil(t, h)
 		assert.NoError(t, err)
 
-		req := &connectgo.Request[userv1.GetUserByUsernameRequest]{
-			Msg: &userv1.GetUserByUsernameRequest{
+		req := &connectgo.Request[userv2.GetUserByUsernameRequest]{
+			Msg: &userv2.GetUserByUsernameRequest{
 				Username: &wrapperspb.StringValue{Value: "username"},
 			},
 		}
@@ -458,7 +459,7 @@ func Test_GetUserByUsername(t *testing.T) {
 
 		mock_cache := cache_mocks.NewMockCache(ctrl)
 
-		service, err := service_v1.NewUserStoreService(context.Background(), m, mock_cache)
+		service, err := service_v2.NewUserStoreService(context.Background(), m, mock_cache)
 		assert.NotNil(t, service)
 		assert.NoError(t, err)
 
@@ -466,8 +467,8 @@ func Test_GetUserByUsername(t *testing.T) {
 		assert.NotNil(t, h)
 		assert.NoError(t, err)
 
-		req := &connectgo.Request[userv1.GetUserByUsernameRequest]{
-			Msg: &userv1.GetUserByUsernameRequest{
+		req := &connectgo.Request[userv2.GetUserByUsernameRequest]{
+			Msg: &userv2.GetUserByUsernameRequest{
 				Username: &wrapperspb.StringValue{Value: ""},
 			},
 		}
@@ -489,7 +490,7 @@ func Test_UpdateUsername(t *testing.T) {
 
 		mock_cache := cache_mocks.NewMockCache(ctrl)
 
-		m.EXPECT().UpdateUsername(gomock.Any(), userid, "username").Return(&entities_user_v1.User{
+		m.EXPECT().UpdateUsername(gomock.Any(), userid, "username").Return(&entities_user_v2.User{
 			ID:        userid,
 			Username:  "username",
 			Email:     "testuser@test.com",
@@ -501,7 +502,7 @@ func Test_UpdateUsername(t *testing.T) {
 		mock_cache.EXPECT().Del(gomock.Any(), gomock.Any()).Return(nil)
 		mock_cache.EXPECT().Del(gomock.Any(), gomock.Any()).Return(nil)
 
-		service, err := service_v1.NewUserStoreService(context.Background(), m, mock_cache)
+		service, err := service_v2.NewUserStoreService(context.Background(), m, mock_cache)
 		assert.NotNil(t, service)
 		assert.NoError(t, err)
 
@@ -509,8 +510,8 @@ func Test_UpdateUsername(t *testing.T) {
 		assert.NotNil(t, h)
 		assert.NoError(t, err)
 
-		req := &connectgo.Request[userv1.UpdateUsernameRequest]{
-			Msg: &userv1.UpdateUsernameRequest{
+		req := &connectgo.Request[userv2.UpdateUsernameRequest]{
+			Msg: &userv2.UpdateUsernameRequest{
 				Id:       &wrapperspb.StringValue{Value: userid},
 				Username: &wrapperspb.StringValue{Value: "username"},
 			},
@@ -520,8 +521,8 @@ func Test_UpdateUsername(t *testing.T) {
 		assert.NotNil(t, user)
 		assert.NoError(t, err)
 
-		assert.EqualValues(t, connectgo.NewResponse(&userv1.UpdateUsernameResponse{
-			User: &userv1.User{
+		assert.EqualValues(t, connectgo.NewResponse(&userv2.UpdateUsernameResponse{
+			User: &userv2.User{
 				Id:        &wrappers.StringValue{Value: userid},
 				Username:  &wrappers.StringValue{Value: "username"},
 				Email:     &wrappers.StringValue{Value: "testuser@test.com"},
@@ -538,7 +539,7 @@ func Test_UpdateUsername(t *testing.T) {
 
 		m.EXPECT().UpdateUsername(gomock.Any(), "user_id", "username").Return(nil, pkgerrors.NewInternalServerError("error"))
 
-		service, err := service_v1.NewUserStoreService(context.Background(), m, mock_cache)
+		service, err := service_v2.NewUserStoreService(context.Background(), m, mock_cache)
 		assert.NotNil(t, service)
 		assert.NoError(t, err)
 
@@ -546,8 +547,8 @@ func Test_UpdateUsername(t *testing.T) {
 		assert.NotNil(t, h)
 		assert.NoError(t, err)
 
-		req := &connectgo.Request[userv1.UpdateUsernameRequest]{
-			Msg: &userv1.UpdateUsernameRequest{
+		req := &connectgo.Request[userv2.UpdateUsernameRequest]{
+			Msg: &userv2.UpdateUsernameRequest{
 				Id:       &wrapperspb.StringValue{Value: "user_id"},
 				Username: &wrapperspb.StringValue{Value: "username"},
 			},
@@ -563,7 +564,7 @@ func Test_UpdateUsername(t *testing.T) {
 
 		mock_cache := cache_mocks.NewMockCache(ctrl)
 
-		service, err := service_v1.NewUserStoreService(context.Background(), m, mock_cache)
+		service, err := service_v2.NewUserStoreService(context.Background(), m, mock_cache)
 		assert.NotNil(t, service)
 		assert.NoError(t, err)
 
@@ -571,8 +572,8 @@ func Test_UpdateUsername(t *testing.T) {
 		assert.NotNil(t, h)
 		assert.NoError(t, err)
 
-		req := &connectgo.Request[userv1.UpdateUsernameRequest]{
-			Msg: &userv1.UpdateUsernameRequest{
+		req := &connectgo.Request[userv2.UpdateUsernameRequest]{
+			Msg: &userv2.UpdateUsernameRequest{
 				Id:       &wrapperspb.StringValue{Value: ""},
 				Username: &wrapperspb.StringValue{Value: "username"},
 			},
@@ -588,7 +589,7 @@ func Test_UpdateUsername(t *testing.T) {
 
 		mock_cache := cache_mocks.NewMockCache(ctrl)
 
-		service, err := service_v1.NewUserStoreService(context.Background(), m, mock_cache)
+		service, err := service_v2.NewUserStoreService(context.Background(), m, mock_cache)
 		assert.NotNil(t, service)
 		assert.NoError(t, err)
 
@@ -596,8 +597,8 @@ func Test_UpdateUsername(t *testing.T) {
 		assert.NotNil(t, h)
 		assert.NoError(t, err)
 
-		req := &connectgo.Request[userv1.UpdateUsernameRequest]{
-			Msg: &userv1.UpdateUsernameRequest{
+		req := &connectgo.Request[userv2.UpdateUsernameRequest]{
+			Msg: &userv2.UpdateUsernameRequest{
 				Id:       &wrapperspb.StringValue{Value: "user_id"},
 				Username: &wrapperspb.StringValue{Value: ""},
 			},

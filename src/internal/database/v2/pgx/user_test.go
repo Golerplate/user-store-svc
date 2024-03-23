@@ -1,4 +1,4 @@
-package database_pgx
+package database_pgx_v2
 
 import (
 	"context"
@@ -13,7 +13,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
 
-	entities_user_v1 "github.com/golerplate/user-store-svc/internal/entities/user/v1"
+	entities_user_v2 "github.com/golerplate/user-store-svc/internal/entities/user/v2"
 )
 
 type AnyTime struct{}
@@ -35,7 +35,7 @@ func Test_CreateUser(t *testing.T) {
 
 		mock.ExpectExec("INSERT INTO users").WithArgs(sqlmock.AnyArg(), "username", "testuser@test.com", sqlmock.AnyArg(), sqlmock.AnyArg()).WillReturnResult(sqlmock.NewResult(1, 1))
 
-		user, err := sqlxDB.CreateUser(context.Background(), &entities_user_v1.CreateUserRequest{
+		user, err := sqlxDB.CreateUser(context.Background(), &entities_user_v2.CreateUserRequest{
 			Username: "username",
 			Email:    "testuser@test.com",
 		})
@@ -45,6 +45,7 @@ func Test_CreateUser(t *testing.T) {
 		assert.True(t, constants.User.IsValid(user.ID))
 		assert.Equal(t, "username", user.Username)
 		assert.Equal(t, "testuser@test.com", user.Email)
+		assert.Equal(t, user.IsBanned, false)
 		assert.False(t, user.CreatedAt.IsZero())
 		assert.False(t, user.CreatedAt.IsZero())
 
@@ -63,7 +64,7 @@ func Test_CreateUser(t *testing.T) {
 
 		mock.ExpectExec("INSERT INTO users").WithArgs(sqlmock.AnyArg(), "username", "testuser@test.com", sqlmock.AnyArg(), sqlmock.AnyArg()).WillReturnError(pkgerrors.NewInternalServerError("error"))
 
-		user, err := sqlxDB.CreateUser(context.Background(), &entities_user_v1.CreateUserRequest{
+		user, err := sqlxDB.CreateUser(context.Background(), &entities_user_v2.CreateUserRequest{
 			Username: "username",
 			Email:    "testuser@test.com",
 		})
@@ -100,6 +101,7 @@ func Test_GetUserByEmail(t *testing.T) {
 		assert.True(t, constants.User.IsValid(user.ID))
 		assert.Equal(t, "username", user.Username)
 		assert.Equal(t, "testuser@test.com", user.Email)
+		assert.Equal(t, user.IsBanned, false)
 		assert.False(t, user.CreatedAt.IsZero())
 		assert.False(t, user.UpdatedAt.IsZero())
 
@@ -171,6 +173,7 @@ func Test_GetUserByID(t *testing.T) {
 		assert.True(t, constants.User.IsValid(user.ID))
 		assert.Equal(t, "username", user.Username)
 		assert.Equal(t, "testuser@test.com", user.Email)
+		assert.Equal(t, user.IsBanned, false)
 		assert.False(t, user.CreatedAt.IsZero())
 		assert.False(t, user.UpdatedAt.IsZero())
 
@@ -246,6 +249,7 @@ func Test_GetUserByUsername(t *testing.T) {
 		assert.True(t, constants.User.IsValid(user.ID))
 		assert.Equal(t, "username", user.Username)
 		assert.Equal(t, "testuser@test.com", user.Email)
+		assert.Equal(t, user.IsBanned, false)
 		assert.False(t, user.CreatedAt.IsZero())
 		assert.False(t, user.UpdatedAt.IsZero())
 
@@ -317,6 +321,7 @@ func Test_UpdateUsername(t *testing.T) {
 		assert.True(t, constants.User.IsValid(user.ID))
 		assert.Equal(t, "username", user.Username)
 		assert.Equal(t, "testuser@test.com", user.Email)
+		assert.Equal(t, user.IsBanned, false)
 		assert.False(t, user.CreatedAt.IsZero())
 		assert.False(t, user.UpdatedAt.IsZero())
 

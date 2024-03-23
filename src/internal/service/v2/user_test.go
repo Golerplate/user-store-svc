@@ -13,8 +13,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 
-	database_mocks "github.com/golerplate/user-store-svc/internal/database/v1/mocks"
-	entities_user_v1 "github.com/golerplate/user-store-svc/internal/entities/user/v1"
+	database_mocks "github.com/golerplate/user-store-svc/internal/database/v2/mocks"
+	entities_user_v2 "github.com/golerplate/user-store-svc/internal/entities/user/v2"
 )
 
 func Test_CreateUser(t *testing.T) {
@@ -25,10 +25,10 @@ func Test_CreateUser(t *testing.T) {
 		userid := constants.GenerateDataPrefixWithULID(constants.User)
 		created := time.Now()
 
-		mock_database.EXPECT().CreateUser(gomock.Any(), &entities_user_v1.CreateUserRequest{
+		mock_database.EXPECT().CreateUser(gomock.Any(), &entities_user_v2.CreateUserRequest{
 			Username: "Teyz",
 			Email:    "testuser@test.com",
-		}).Return(&entities_user_v1.User{
+		}).Return(&entities_user_v2.User{
 			ID:        userid,
 			Username:  "Teyz",
 			Email:     "testuser@test.com",
@@ -42,7 +42,7 @@ func Test_CreateUser(t *testing.T) {
 		assert.NotNil(t, s)
 		assert.NoError(t, err)
 
-		user, err := s.CreateUser(context.Background(), &entities_user_v1.CreateUserRequest{
+		user, err := s.CreateUser(context.Background(), &entities_user_v2.CreateUserRequest{
 			Username: "Teyz",
 			Email:    "testuser@test.com",
 		})
@@ -59,7 +59,7 @@ func Test_CreateUser(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		mock_database := database_mocks.NewMockDatabase(ctrl)
 
-		mock_database.EXPECT().CreateUser(gomock.Any(), &entities_user_v1.CreateUserRequest{
+		mock_database.EXPECT().CreateUser(gomock.Any(), &entities_user_v2.CreateUserRequest{
 			Username: "Teyz",
 			Email:    "testuser@test.com",
 		}).Return(nil, pkgerrors.NewInternalServerError("error"))
@@ -70,7 +70,7 @@ func Test_CreateUser(t *testing.T) {
 		assert.NotNil(t, s)
 		assert.NoError(t, err)
 
-		user, err := s.CreateUser(context.Background(), &entities_user_v1.CreateUserRequest{
+		user, err := s.CreateUser(context.Background(), &entities_user_v2.CreateUserRequest{
 			Username: "Teyz",
 			Email:    "testuser@test.com",
 		})
@@ -89,7 +89,7 @@ func Test_GetUserByEmail(t *testing.T) {
 
 		mock_cache := cache_mocks.NewMockCache(ctrl)
 
-		userCached := &entities_user_v1.User{
+		userCached := &entities_user_v2.User{
 			ID:        userid,
 			Username:  "username",
 			Email:     "testuser@test.com",
@@ -122,7 +122,7 @@ func Test_GetUserByEmail(t *testing.T) {
 		userid := constants.GenerateDataPrefixWithULID(constants.User)
 		created := time.Now()
 
-		mock_database.EXPECT().GetUserByEmail(gomock.Any(), "testuser@test.com").Return(&entities_user_v1.User{
+		mock_database.EXPECT().GetUserByEmail(gomock.Any(), "testuser@test.com").Return(&entities_user_v2.User{
 			ID:        userid,
 			Username:  "username",
 			Email:     "testuser@test.com",
@@ -134,7 +134,7 @@ func Test_GetUserByEmail(t *testing.T) {
 
 		mock_cache.EXPECT().Get(gomock.Any(), "testuser@test.com").Return("", pkgerrors.NewNotFoundError("error"))
 
-		userCached := &entities_user_v1.User{
+		userCached := &entities_user_v2.User{
 			ID:        userid,
 			Username:  "username",
 			Email:     "testuser@test.com",
@@ -191,7 +191,7 @@ func Test_GetUserByEmail(t *testing.T) {
 		userid := constants.GenerateDataPrefixWithULID(constants.User)
 		created := time.Now()
 
-		mock_database.EXPECT().GetUserByEmail(gomock.Any(), "testuser@test.com").Return(&entities_user_v1.User{
+		mock_database.EXPECT().GetUserByEmail(gomock.Any(), "testuser@test.com").Return(&entities_user_v2.User{
 			ID:        userid,
 			Username:  "username",
 			Email:     "testuser@test.com",
@@ -199,7 +199,7 @@ func Test_GetUserByEmail(t *testing.T) {
 			UpdatedAt: created,
 		}, nil)
 
-		userCached := &entities_user_v1.User{
+		userCached := &entities_user_v2.User{
 			ID:        userid,
 			Username:  "username",
 			Email:     "testuser@test.com",
@@ -237,7 +237,7 @@ func Test_GetUserByUsename(t *testing.T) {
 
 		mock_cache := cache_mocks.NewMockCache(ctrl)
 
-		userCached := &entities_user_v1.User{
+		userCached := &entities_user_v2.User{
 			ID:        userid,
 			Username:  "username",
 			Email:     "testuser@test.com",
@@ -270,7 +270,7 @@ func Test_GetUserByUsename(t *testing.T) {
 		userid := constants.GenerateDataPrefixWithULID(constants.User)
 		created := time.Now()
 
-		mock_database.EXPECT().GetUserByUsername(gomock.Any(), "username").Return(&entities_user_v1.User{
+		mock_database.EXPECT().GetUserByUsername(gomock.Any(), "username").Return(&entities_user_v2.User{
 			ID:        userid,
 			Username:  "username",
 			Email:     "testuser@test.com",
@@ -282,7 +282,7 @@ func Test_GetUserByUsename(t *testing.T) {
 
 		mock_cache.EXPECT().Get(gomock.Any(), "username").Return("", pkgerrors.NewNotFoundError("error"))
 
-		userCached := &entities_user_v1.User{
+		userCached := &entities_user_v2.User{
 			ID:        userid,
 			Username:  "username",
 			Email:     "testuser@test.com",
@@ -339,7 +339,7 @@ func Test_GetUserByUsename(t *testing.T) {
 		userid := constants.GenerateDataPrefixWithULID(constants.User)
 		created := time.Now()
 
-		mock_database.EXPECT().GetUserByUsername(gomock.Any(), "username").Return(&entities_user_v1.User{
+		mock_database.EXPECT().GetUserByUsername(gomock.Any(), "username").Return(&entities_user_v2.User{
 			ID:        userid,
 			Username:  "username",
 			Email:     "testuser@test.com",
@@ -347,7 +347,7 @@ func Test_GetUserByUsename(t *testing.T) {
 			UpdatedAt: created,
 		}, nil)
 
-		userCached := &entities_user_v1.User{
+		userCached := &entities_user_v2.User{
 			ID:        userid,
 			Username:  "username",
 			Email:     "testuser@test.com",
@@ -385,7 +385,7 @@ func Test_GetUserByID(t *testing.T) {
 
 		mock_cache := cache_mocks.NewMockCache(ctrl)
 
-		userCached := &entities_user_v1.User{
+		userCached := &entities_user_v2.User{
 			ID:        userid,
 			Username:  "username",
 			Email:     "testuser@test.com",
@@ -418,7 +418,7 @@ func Test_GetUserByID(t *testing.T) {
 		userid := constants.GenerateDataPrefixWithULID(constants.User)
 		created := time.Now()
 
-		mock_database.EXPECT().GetUserByID(gomock.Any(), userid).Return(&entities_user_v1.User{
+		mock_database.EXPECT().GetUserByID(gomock.Any(), userid).Return(&entities_user_v2.User{
 			ID:        userid,
 			Username:  "username",
 			Email:     "testuser@test.com",
@@ -430,7 +430,7 @@ func Test_GetUserByID(t *testing.T) {
 
 		mock_cache.EXPECT().Get(gomock.Any(), userid).Return("", pkgerrors.NewNotFoundError("error"))
 
-		userCached := &entities_user_v1.User{
+		userCached := &entities_user_v2.User{
 			ID:        userid,
 			Username:  "username",
 			Email:     "testuser@test.com",
@@ -489,7 +489,7 @@ func Test_GetUserByID(t *testing.T) {
 
 		mock_cache.EXPECT().Get(gomock.Any(), userid).Return(fakeData, nil)
 
-		mock_database.EXPECT().GetUserByID(gomock.Any(), userid).Return(&entities_user_v1.User{
+		mock_database.EXPECT().GetUserByID(gomock.Any(), userid).Return(&entities_user_v2.User{
 			ID:        userid,
 			Username:  "username",
 			Email:     "testuser@test.com",
@@ -497,7 +497,7 @@ func Test_GetUserByID(t *testing.T) {
 			UpdatedAt: created,
 		}, nil)
 
-		userCached := &entities_user_v1.User{
+		userCached := &entities_user_v2.User{
 			ID:        userid,
 			Username:  "username",
 			Email:     "testuser@test.com",
@@ -534,7 +534,7 @@ func Test_UpdateUsername(t *testing.T) {
 		created := time.Now()
 
 		mock_cache := cache_mocks.NewMockCache(ctrl)
-		mock_database.EXPECT().UpdateUsername(gomock.Any(), userid, "username").Return(&entities_user_v1.User{
+		mock_database.EXPECT().UpdateUsername(gomock.Any(), userid, "username").Return(&entities_user_v2.User{
 			ID:        userid,
 			Username:  "username",
 			Email:     "testuser@test.com",

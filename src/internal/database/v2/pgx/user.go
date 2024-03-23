@@ -1,4 +1,4 @@
-package database_pgx
+package database_pgx_v2
 
 import (
 	"context"
@@ -10,10 +10,10 @@ import (
 	"github.com/golerplate/pkg/errors"
 	"github.com/rs/zerolog/log"
 
-	entities_user_v1 "github.com/golerplate/user-store-svc/internal/entities/user/v1"
+	entities_user_v2 "github.com/golerplate/user-store-svc/internal/entities/user/v2"
 )
 
-func (d *dbClient) CreateUser(ctx context.Context, req *entities_user_v1.CreateUserRequest) (*entities_user_v1.User, error) {
+func (d *dbClient) CreateUser(ctx context.Context, req *entities_user_v2.CreateUserRequest) (*entities_user_v2.User, error) {
 	userID := constants.GenerateDataPrefixWithULID(constants.User)
 	now := time.Now()
 
@@ -22,11 +22,12 @@ func (d *dbClient) CreateUser(ctx context.Context, req *entities_user_v1.CreateU
 			users (
 				id,
 				username,
-				email, 
+				email,
+				is_banned,
 				created_at, 
 				updated_at
 			) 
-			VALUES ($1, $2, $3, $4, $5);
+			VALUES ($1, $2, $3, false, $4, $5);
 		`,
 		userID, req.Username, req.Email, now, now)
 	if err != nil {
@@ -35,23 +36,25 @@ func (d *dbClient) CreateUser(ctx context.Context, req *entities_user_v1.CreateU
 		return nil, errors.NewInternalServerError(fmt.Sprintf("failed to create user: %v", err.Error()))
 	}
 
-	return &entities_user_v1.User{
+	return &entities_user_v2.User{
 		ID:        userID,
 		Username:  req.Username,
 		Email:     req.Email,
+		IsBanned:  false,
 		CreatedAt: now,
 		UpdatedAt: now,
 	}, nil
 }
 
-func (d *dbClient) GetUserByEmail(ctx context.Context, email string) (*entities_user_v1.User, error) {
-	user := &entities_user_v1.User{}
+func (d *dbClient) GetUserByEmail(ctx context.Context, email string) (*entities_user_v2.User, error) {
+	user := &entities_user_v2.User{}
 
 	err := d.connection.DB.QueryRowContext(ctx,
 		`SELECT
 			id,
 			username,
 			email,
+			is_banned,
 			created_at,
 			updated_at
 		FROM
@@ -63,6 +66,7 @@ func (d *dbClient) GetUserByEmail(ctx context.Context, email string) (*entities_
 		&user.ID,
 		&user.Username,
 		&user.Email,
+		&user.IsBanned,
 		&user.CreatedAt,
 		&user.UpdatedAt,
 	)
@@ -81,14 +85,15 @@ func (d *dbClient) GetUserByEmail(ctx context.Context, email string) (*entities_
 	return user, nil
 }
 
-func (d *dbClient) GetUserByID(ctx context.Context, id string) (*entities_user_v1.User, error) {
-	user := &entities_user_v1.User{}
+func (d *dbClient) GetUserByID(ctx context.Context, id string) (*entities_user_v2.User, error) {
+	user := &entities_user_v2.User{}
 
 	err := d.connection.DB.QueryRowContext(ctx,
 		`SELECT
 			id,
 			username,
 			email, 
+			is_banned,
 			created_at, 
 			updated_at
 		FROM
@@ -100,6 +105,7 @@ func (d *dbClient) GetUserByID(ctx context.Context, id string) (*entities_user_v
 		&user.ID,
 		&user.Username,
 		&user.Email,
+		&user.IsBanned,
 		&user.CreatedAt,
 		&user.UpdatedAt,
 	)
@@ -118,15 +124,16 @@ func (d *dbClient) GetUserByID(ctx context.Context, id string) (*entities_user_v
 	return user, nil
 }
 
-func (d *dbClient) GetUserByUsername(ctx context.Context, username string) (*entities_user_v1.User, error) {
-	user := &entities_user_v1.User{}
+func (d *dbClient) GetUserByUsername(ctx context.Context, username string) (*entities_user_v2.User, error) {
+	user := &entities_user_v2.User{}
 
 	err := d.connection.DB.QueryRowContext(ctx,
 		`SELECT
 			id,
 			username,
-			email, 
-			created_at, 
+			email,
+			is_banned,
+			created_at,
 			updated_at
 		FROM
 			users
@@ -137,6 +144,7 @@ func (d *dbClient) GetUserByUsername(ctx context.Context, username string) (*ent
 		&user.ID,
 		&user.Username,
 		&user.Email,
+		&user.IsBanned,
 		&user.CreatedAt,
 		&user.UpdatedAt,
 	)
@@ -155,8 +163,8 @@ func (d *dbClient) GetUserByUsername(ctx context.Context, username string) (*ent
 	return user, nil
 }
 
-func (d *dbClient) UpdateUsername(ctx context.Context, userID, username string) (*entities_user_v1.User, error) {
-	user := &entities_user_v1.User{}
+func (d *dbClient) UpdateUsername(ctx context.Context, userID, username string) (*entities_user_v2.User, error) {
+	user := &entities_user_v2.User{}
 
 	err := d.connection.DB.QueryRowContext(ctx,
 		`UPDATE
@@ -170,6 +178,7 @@ func (d *dbClient) UpdateUsername(ctx context.Context, userID, username string) 
 			id,
 			username,
 			email,
+			is_banned,
 			created_at,
 			updated_at
 		`,
@@ -177,6 +186,7 @@ func (d *dbClient) UpdateUsername(ctx context.Context, userID, username string) 
 		&user.ID,
 		&user.Username,
 		&user.Email,
+		&user.IsBanned,
 		&user.CreatedAt,
 		&user.UpdatedAt,
 	)

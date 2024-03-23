@@ -9,7 +9,7 @@ import (
 	grpcreflect "github.com/bufbuild/connect-grpcreflect-go"
 	"github.com/golerplate/contracts/generated/services"
 	"github.com/golerplate/contracts/generated/services/servicesconnect"
-	"github.com/golerplate/contracts/generated/services/user/store/svc/v1/svcv1connect"
+	"github.com/golerplate/contracts/generated/services/user/store/svc/v2/svcv2connect"
 	"github.com/golerplate/pkg/grpc"
 	sharedmidlewares "github.com/golerplate/pkg/grpc/interceptors"
 	"github.com/rs/zerolog/log"
@@ -17,8 +17,8 @@ import (
 	"golang.org/x/net/http2/h2c"
 
 	"github.com/golerplate/user-store-svc/internal/handlers"
-	handlers_grpc_user_v1 "github.com/golerplate/user-store-svc/internal/handlers/grpc/user/v1"
-	service "github.com/golerplate/user-store-svc/internal/service/v1"
+	handlers_grpc_user_v2 "github.com/golerplate/user-store-svc/internal/handlers/grpc/user/v2"
+	service "github.com/golerplate/user-store-svc/internal/service/v2"
 )
 
 type health struct{}
@@ -48,7 +48,7 @@ func (s *grpcServer) Setup(ctx context.Context) error {
 	log.Info().
 		Msg("handlers.grpc.grpcServer.Setup: Setting up gRPC server...")
 
-	userStoreServiceHandler, err := handlers_grpc_user_v1.NewUserStoreServiceHandler(ctx, s.service)
+	userStoreServiceHandler, err := handlers_grpc_user_v2.NewUserStoreServiceHandler(ctx, s.service)
 	if err != nil {
 		log.Fatal().Err(err).
 			Msg("main: unable to create user store service handler")
@@ -57,12 +57,12 @@ func (s *grpcServer) Setup(ctx context.Context) error {
 	interceptors := connectgo.WithInterceptors(sharedmidlewares.ServerDefaultChain()...)
 
 	reflector := grpcreflect.NewStaticReflector(
-		"services.user.store.svc.v1.UserStoreSvc", "services.health.HealthService",
+		"services.user.store.svc.v2.UserStoreSvc", "services.health.HealthService",
 	)
 
 	mux := http.NewServeMux()
 	mux.Handle(servicesconnect.NewHealthServiceHandler(NewHealthHandler()))
-	mux.Handle(svcv1connect.NewUserStoreSvcHandler(userStoreServiceHandler, interceptors))
+	mux.Handle(svcv2connect.NewUserStoreSvcHandler(userStoreServiceHandler, interceptors))
 	mux.Handle(grpcreflect.NewHandlerV1(reflector))
 	mux.Handle(grpcreflect.NewHandlerV1Alpha(reflector))
 

@@ -4,6 +4,7 @@ CREATE TABLE users (
     id           VARCHAR(40) PRIMARY KEY NOT NULL,
     username    VARCHAR(255) NOT NULL,
     email       VARCHAR(255) NOT NULL,
+    is_banned  BOOLEAN NOT NULL DEFAULT FALSE,
     created_at   TIMESTAMP(6) NOT NULL,
     updated_at TIMESTAMP(6)
 );
