@@ -13,9 +13,9 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/golerplate/user-store-svc/internal/config"
-	database_v1_pgx "github.com/golerplate/user-store-svc/internal/database/v1/pgx"
+	database_pgx_v2 "github.com/golerplate/user-store-svc/internal/database/v2/pgx"
 	handlers_grpc "github.com/golerplate/user-store-svc/internal/handlers/grpc"
-	service "github.com/golerplate/user-store-svc/internal/service/v1"
+	service_v1 "github.com/golerplate/user-store-svc/internal/service/v2"
 )
 
 func main() {
@@ -40,9 +40,9 @@ func main() {
 		log.Fatal().Err(err).
 			Msg("main: unable to create database connection")
 	}
-	databaseClient := database_v1_pgx.NewClient(ctx, databaseConnection)
+	databaseClient := database_pgx_v2.NewClient(ctx, databaseConnection)
 
-	userStoreService, err := service.NewUserStoreService(ctx, databaseClient, cacheRedis)
+	userStoreService, err := service_v1.NewUserStoreService(ctx, databaseClient, cacheRedis)
 	if err != nil {
 		log.Fatal().Err(err).
 			Msg("main: unable to create user store service")

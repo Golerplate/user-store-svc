@@ -28,6 +28,8 @@ github.com/golang/protobuf v1.5.3 h1:KhyjKVUg7Usr/dYsdSqoFveMYd5ko72D+zANwlG1mmg
 github.com/golang/protobuf v1.5.3/go.mod h1:XVQd3VNwM+JqD3oG2Ue2ip4fOMUkwXdXDdiuN0vRsmY=
 github.com/golerplate/contracts v0.0.21 h1:2jXAyledEYG+a7cDspcVfgXlhtaxmaOO4PRchnNSNOA=
 github.com/golerplate/contracts v0.0.21/go.mod h1:ngmB/qx1WQFkGMS4TNGvHkWR1RxAtedI8cz7ig/EYP8=
+github.com/golerplate/contracts v0.0.24 h1:bobnjQ0xRry6zEZ1BG0D3Vf04L90cyosMzUhYp38FDM=
+github.com/golerplate/contracts v0.0.24/go.mod h1:ngmB/qx1WQFkGMS4TNGvHkWR1RxAtedI8cz7ig/EYP8=
 github.com/golerplate/pkg v0.0.16 h1:Thb8Hdj5gK1AmtRNGti7UZPSLNvc7noiyQKd1a71pzM=
 github.com/golerplate/pkg v0.0.16/go.mod h1:q3ou/jgtgNnQ35qrlRKOqsMVhnPpbno0SQ3EAM3pO6Q=
 github.com/google/go-cmp v0.5.5/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
