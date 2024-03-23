@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 
-	database_mocks "github.com/golerplate/user-store-svc/internal/database/mocks"
+	database_mocks "github.com/golerplate/user-store-svc/internal/database/v1/mocks"
 	entities_user_v1 "github.com/golerplate/user-store-svc/internal/entities/user/v1"
 )
 

@@ -17,7 +17,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 
-	database_mocks "github.com/golerplate/user-store-svc/internal/database/mocks"
+	database_mocks "github.com/golerplate/user-store-svc/internal/database/v1/mocks"
 	entities_user_v1 "github.com/golerplate/user-store-svc/internal/entities/user/v1"
 	service_v1 "github.com/golerplate/user-store-svc/internal/service/v1"
 )
