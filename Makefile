@@ -15,20 +15,27 @@ override DB_PASSWORD = root
 endif
 
 ifndef DB_NAME
-override DB_NAME = user-store-db
+override DB_NAME = faceit-user-store-svc-db
 endif
 
+protobuff-install:
+	go install -v github.com/incu6us/goimports-reviser/v3@latest
+	go install github.com/bufbuild/buf/cmd/buf@latest
+
+protobuff-generate:
+	cd contracts && buf generate
+
 run:
-	cd src && docker-compose up
+	docker-compose up
 
 update:
-	cd src && go mod tidy
+	go mod tidy
 
 unit-test:
-	cd src && go test -v -cover ./...
+	go test -v -cover ./...
 
 create-migration:
-	cd src/internal/database/migrations && goose create ${name} sql
+	cd internal/database/migrations && goose create ${name} sql
 
 migration-up:
-	cd src/internal/database/migrations && goose postgres "host=$(DB_HOST) port=$(DB_PORT) user=$(DB_USER) password=$(DB_PASSWORD) dbname=$(DB_NAME) sslmode=disable" up
+	cd internal/database/migrations && goose postgres "host=$(DB_HOST) port=$(DB_PORT) user=$(DB_USER) password=$(DB_PASSWORD) dbname=$(DB_NAME) sslmode=disable" up

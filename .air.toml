@@ -1,0 +1,18 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+  bin = "tmp/main"  # Path to the binary
+  cmd = "go build -o tmp/main ./cmd/main.go"  # Command to build the binary
+  include_ext = ["go"]  # File extensions to watch
+  exclude_dir = ["assets", "vendor"]  # Directories to exclude from watching
+
+[watch]
+  include_ext = ["go"]
+  exclude_dir = ["assets", "vendor"]
+
+[color]
+  main = "yellow"
+  watcher = "cyan"
+  build = "green"
+  run = "blue"
